@@ -1,0 +1,162 @@
+$date-size: 280 / 7;
+$half-date-size: $date-size / 2;
+
+.mh-calendar {
+    box-sizing: border-box;
+    font-family: sans-serif;
+    margin-top: 20px;
+    padding: 10px;
+    width: 300px;
+
+    * { box-sizing: border-box; }
+
+    // Nav
+    &__nav {
+        position: relative;
+    }
+
+    &__month {
+        color: #7f7f7f;
+        font-size: 18px;
+        text-align: center;
+    }
+
+    &__next-month {
+        border-bottom: 8px solid transparent;
+        border-left: 12px solid #9f9f9f;
+        border-radius: 3px;
+        border-top: 8px solid transparent;
+        cursor: pointer;
+        height: 0;
+        position: absolute;
+        right: 10px;
+        top: 2px;
+        width: 0;
+    }
+
+    &__previous-month {
+        border-bottom: 8px solid transparent;
+        border-radius: 3px;
+        border-right: 12px solid #9f9f9f;
+        border-top: 8px solid transparent;
+        cursor: pointer;
+        height: 0;
+        left: 10px;
+        position: absolute;
+        top: 2px;
+        width: 0;
+    }
+
+    // Weekdays
+    &__weekdays {
+        margin-top: 10px;
+
+        &::after {
+            clear: both;
+            content: ' ';
+            display: table;
+        }
+    }
+
+    &__weekday {
+        color: #cfcfcf;
+        float: left;
+        font-size: 11px;
+        font-weight: bold;
+        text-align: center;
+        width: #{$date-size}px;
+    }
+
+    // Dates
+    &__dates {
+        margin-top: 10px;
+
+        &::after {
+            clear: both;
+            content: ' ';
+            display: table;
+        }
+    }
+
+    &__date {
+        color: #333;
+        float: left;
+        font-size: 14px;
+        height: #{$date-size}px;
+        line-height: #{$date-size}px;
+        position: relative;
+        text-align: center;
+        width: #{$date-size}px;
+
+        &:hover {
+            cursor: pointer;
+
+            &::after {
+                background: rgba(0, 0, 0, 0.05);
+                border-radius: #{$half-date-size}px;
+                content: '';
+                display: block;
+                height: #{$date-size}px;
+                left: 0;
+                position: absolute;
+                top: 0;
+                width: #{$date-size}px;
+            }
+        }
+
+        &--in-range {
+            background: #c4f4f9;
+        }
+
+        &--range-start {
+            background: #91e9f1;
+            border-bottom-left-radius: #{$half-date-size}px;
+            border-top-left-radius: #{$half-date-size}px;
+            color: #fff;
+            font-weight: bold;
+
+            &:hover {
+                cursor: default;
+
+                &::after {
+                    display: none;
+                }
+            }
+        }
+
+        &--range-end {
+            background: #91e9f1;
+            border-bottom-right-radius: #{$half-date-size}px;
+            border-top-right-radius: #{$half-date-size}px;
+            color: #fff;
+            font-weight: bold;
+
+            &:hover {
+                cursor: default;
+
+                &::after {
+                    display: none;
+                }
+            }
+        }
+
+        &--today {
+            text-decoration: underline;
+        }
+
+        &--blocked {
+            color: #9f9f9f;
+            font-style: italic;
+            font-weight: normal;
+
+            &:hover {
+                cursor: default;
+
+                &::after {
+                    display: none;
+                }
+            }
+        }
+
+    }
+}

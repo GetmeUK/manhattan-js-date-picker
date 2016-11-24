@@ -16,6 +16,7 @@ class DateRangePicker
 
 
 module.exports = {
+    Calendar: calendar.Calendar,
     DatePicker: DatePicker,
     DateRangePicker: DateRangePicker
     }
