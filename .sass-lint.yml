@@ -93,6 +93,8 @@ rules:
     - 2
   no-universal-selectors:
     - 0
+  no-vendor-prefixes:
+    - 0
   one-declaration-per-line:
     - 2
   property-sort-order:

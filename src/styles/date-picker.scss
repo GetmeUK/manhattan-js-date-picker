@@ -2,13 +2,23 @@ $date-size: 280 / 7;
 $half-date-size: $date-size / 2;
 
 .mh-calendar {
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+
     box-sizing: border-box;
     font-family: sans-serif;
     margin-top: 20px;
     padding: 10px;
+    user-select: none;
+
     width: 300px;
 
-    * { box-sizing: border-box; }
+
+    * {
+        box-sizing: border-box;
+    }
 
     // Nav
     &__nav {
@@ -21,7 +31,7 @@ $half-date-size: $date-size / 2;
         text-align: center;
     }
 
-    &__next-month {
+    &__next {
         border-bottom: 8px solid transparent;
         border-left: 12px solid #9f9f9f;
         border-radius: 3px;
@@ -34,7 +44,7 @@ $half-date-size: $date-size / 2;
         width: 0;
     }
 
-    &__previous-month {
+    &__previous {
         border-bottom: 8px solid transparent;
         border-radius: 3px;
         border-right: 12px solid #9f9f9f;
