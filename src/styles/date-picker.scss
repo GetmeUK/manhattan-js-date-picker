@@ -170,3 +170,13 @@ $half-date-size: $date-size / 2;
 
     }
 }
+
+.mh-date-picker {
+    position: absolute;
+    width: 300px;
+    z-index: 4;
+
+    &--closed {
+        display: none;
+    }
+}

@@ -8,19 +8,9 @@ class Calendar
     constructor: (parent, options={}) ->
 
         # Configure the instance
-        today = new Date()
-        today.setHours(0, 0, 0, 0)
-
         $.config(
             this,
             {
-                # The currently selected date range
-                dateRange: [today, today],
-
-                # The current month, year the calendar is displaying
-                month: today.getMonth()
-                year: today.getFullYear()
-
                 # Typically a list of dates, the `dates` option is used in
                 # conjunction with the `test` behaviour to determine which dates
                 # can be picked.
@@ -50,16 +40,12 @@ class Calendar
                     'September',
                     'October',
                     'November',
-                    'December',
+                    'December'
                     ],
 
                 # A list of weekday names that will be used when displaying the
                 # days of the week (must contain exactly 7 names).
-                weekdayNames: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-
-                # A list of date parsers that will be used to attempt to parse
-                # dates in string format.
-                parsers: ['human_en', 'dmy', 'iso']
+                weekdayNames: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
             },
             options
             )
@@ -68,8 +54,22 @@ class Calendar
         @_behaviours = {}
         $.config(@_behaviours, {test: 'any'}, options)
 
+        # Initially the calendar view will focus on today's date
+        today = new Date()
+        today.setHours(0, 0, 0, 0)
+
+        # The date range currently selected
+        @_dateRange = [today, today]
+
+        # The month and year currently displayed by the calendar
+        @_month = today.getMonth()
+        @_year = today.getFullYear()
+
         # Domain for related DOM elements
         @_dom = {}
+
+        # Store a reference to the parent the calendar is being added to
+        @_dom.parent = parent
 
         # Build the elements required for the calendar
 
@@ -115,24 +115,20 @@ class Calendar
             date = $.create('div', {'class': @_bem('mh-calendar', 'date')})
             @_dom.dates.appendChild(date)
 
-        # Store a reference to the parent the calendar is being added to
-        @_dom.parent = parent
-
         # Define read-only properties
         Object.defineProperty(this, 'calendar', {value: @_dom.calendar})
         Object.defineProperty(this, 'parent', {value: @_dom.parent})
-
-        @_dateRange = @dateRange
         Object.defineProperty(
             this, 'dateRange', {get: () -> return @_dateRange})
-
-        @_month = @month
         Object.defineProperty(this, 'month', {get: () -> return @_month})
-
-        @_year = @year
         Object.defineProperty(this, 'year', {get: () -> return @_year})
 
         # Set up event listeners for the calendar
+        $.listen @_dom.calendar,
+            'mousedown': (ev) ->
+                # Prevent picking from the calendar switching focus
+                ev.preventDefault()
+
         $.listen @_dom.next,
             'click': (ev) =>
                 ev.preventDefault()
@@ -147,8 +143,12 @@ class Calendar
             'click': (ev) =>
                 ev.preventDefault()
 
-                # Find the parent date
+                # Find the date element
                 dateElm = ev.target
+
+                if dateElm is @_dom.dates
+                    return
+
                 while dateElm.parentNode isnt @_dom.dates
                     dateElm = dateElm.parentNode
 
@@ -158,7 +158,11 @@ class Calendar
                     return
 
                 # Dispatch a pick event against the calendar
-                $.dispatch @calendar, @_et('pick'), {'date': dateElm.__mh_date}
+                $.dispatch(
+                    @calendar,
+                    @_et('pick'),
+                    {'calendar': this, 'date': dateElm.__mh_date}
+                    )
 
         # Update the calendar view
         @update()
@@ -176,7 +180,11 @@ class Calendar
         @update()
 
         # Dispatch a goto event against the calendar
-        $.dispatch @calendar, @_et('goto'), {'month': month, 'year': year}
+        $.dispatch(
+            @calendar,
+            @_et('goto'),
+            {'calendar': this, 'month': month, 'year': year}
+            )
 
     next: () ->
         # Display the next month in the calendar
@@ -188,19 +196,6 @@ class Calendar
             year += 1
 
         @goto(month, year)
-
-    parseDate: (s) ->
-        # Parse a date string (if a date is supplied it'll be returned as is)
-
-        # Check if we've been sent a date
-        if s instanceof Date
-            return s
-
-        # Attempt to parse the string as a date
-        for parser in @parsers
-            date = @constructor.parsers[parser](s)
-            if date
-                return date
 
     previous: () ->
         # Display the previous month in the calendar
@@ -258,6 +253,13 @@ class Calendar
             if date.getMonth() != @month
                 classList.add(@_bem('mh-calendar', 'date', 'blocked'))
 
+            # Check if the date is within the min/max range
+            if @minDate and @minDate.getTime() > date.getTime()
+                classList.add(@_bem('mh-calendar', 'date', 'blocked'))
+
+            if @maxDate and @maxDate.getTime() < date.getTime()
+                classList.add(@_bem('mh-calendar', 'date', 'blocked'))
+
             # Check if the date is blocked
             test = @constructor.behaviours.test[@_behaviours.test]
             if not test(this, @dates, date)
@@ -297,6 +299,21 @@ class Calendar
     _et: (eventName) ->
         # Generate an event type name
         return "mh-calendar--#{eventName}"
+
+    # Class methods
+
+    @parseDate: (s, parsers) ->
+        # Parse a date string (if a date is supplied it'll be returned as is)
+
+        # Check if we've been sent a date
+        if s instanceof Date
+            return s
+
+        # Attempt to parse the string as a date
+        for parser in parsers
+            date = @parsers[parser](s)
+            if date
+                return date
 
     # Behaviours
 

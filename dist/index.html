@@ -10,28 +10,26 @@
     </head>
     <body>
         <form>
-            <input type="hidden" name="lang" id="lang">
+            <input type="type" name="date" id="lang">
             <input
                 type="text"
-                name="date"
-                value=""
+                name="date__mask"
+                value="23 Aug 2016"
                 data-mh-date-picker
+                data-mh-date-picker--input="set-hidden"
+                data-mh-date-picker--hidden="[name='date']"
+                data-mh-date-picker--hidden-format="iso"
+                data-mh-date-picker--min-date="2016-08-10"
+                data-mh-date-picker--max-date="2016-08-30"
+                data-mh-date-picker--test="excluding"
+                data-mh-date-picker--dates="2016-08-15,2016-08-16"
+                data-mh-date-picker--weekday-names="S,M,T,W,T,F,S"
                 >
         </form>
         <script src="http://localhost:5999/index.js"></script>
         <script>
-            var input = document.getElementsByName('date')[0];
-            calendar = new ManhattanDatePicker.Calendar(document.body, {});
-
-            calendar.calendar.addEventListener(
-                'mh-calendar--pick',
-                function(ev) {
-                    calendar.select(ev.date);
-                }
-            )
-
-            var d = calendar.parseDate('9 Oct 15');
-            console.log(d, ManhattanDatePicker.Calendar.formats.human_en(d));
+            var input = document.getElementsByName('date__mask')[0];
+            calendar = new ManhattanDatePicker.DatePicker(input);
 
         </script>
     </body>
