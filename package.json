@@ -1,7 +1,7 @@
 {
-  "name": "manhattan-typeahead",
-  "version": "0.0.4",
-  "description": "Support for typeahead behaviour on form fields.",
+  "name": "manhattan-date-picker",
+  "version": "0.0.1",
+  "description": "Date picker support for form fields.",
   "main": "dist/index.js",
   "scripts": {
     "dist": "NODE_ENV=dist webpack --progress",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@git.getme.co.uk:manhattan/manhattan_js_typeahead.git"
+    "url": "git@git.getme.co.uk:manhattan/manhattan_js_date-picker.git"
   },
   "keywords": [
     "typeahead",
