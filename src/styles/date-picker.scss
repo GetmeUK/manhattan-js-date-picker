@@ -171,7 +171,8 @@ $half-date-size: $date-size / 2;
     }
 }
 
-.mh-date-picker {
+.mh-date-picker,
+.mh-date-range-picker {
     position: absolute;
     width: 300px;
     z-index: 4;

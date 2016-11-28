@@ -119,7 +119,7 @@ class Calendar
         Object.defineProperty(this, 'calendar', {value: @_dom.calendar})
         Object.defineProperty(this, 'parent', {value: @_dom.parent})
         Object.defineProperty(
-            this, 'dateRange', {get: () -> return @_dateRange})
+            this, 'dateRange', {get: () -> return @_dateRange.slice()})
         Object.defineProperty(this, 'month', {get: () -> return @_month})
         Object.defineProperty(this, 'year', {get: () -> return @_year})
 
@@ -173,20 +173,21 @@ class Calendar
         # Destroy the calendar (remove it from the DOM)
         @parent.removeChild(@calendar)
 
-    goto: (month, year) =>
+    goto: (month, year, dispatchEvent=true) =>
         # Display the given month, year in the calendar
         @_month = month
         @_year = year
         @update()
 
         # Dispatch a goto event against the calendar
-        $.dispatch(
-            @calendar,
-            @_et('goto'),
-            {'calendar': this, 'month': month, 'year': year}
-            )
+        if dispatchEvent
+            $.dispatch(
+                @calendar,
+                @_et('goto'),
+                {'calendar': this, 'month': month, 'year': year}
+                )
 
-    next: () ->
+    next: (dispatchEvent=true) ->
         # Display the next month in the calendar
         month = @month + 1
         year = @year
@@ -195,16 +196,16 @@ class Calendar
             month = 1
             year += 1
 
-        @goto(month, year)
+        @goto(month, year, dispatchEvent)
 
-    previous: () ->
+    previous: (dispatchEvent=true) ->
         # Display the previous month in the calendar
         month = @month - 1
         year = @year
         if month < 0
             month = 11
             year -= 1
-        @goto(month, year)
+        @goto(month, year, dispatchEvent)
 
     select: (startDate, endDate=null) ->
         # Set the selected date/date range for the calendar
@@ -212,6 +213,7 @@ class Calendar
             @_dateRange = [startDate, endDate]
         else
             @_dateRange = [startDate, startDate]
+
         @update()
 
     update: () ->
@@ -487,10 +489,10 @@ class Calendar
             s = s.trim()
             s = s.toLowerCase()
             s = s.replace(',', ' ')
-            s = s.replace('st', ' ')
-            s = s.replace('nd', ' ')
-            s = s.replace('rd', ' ')
-            s = s.replace('th', ' ')
+            s = s.replace(/(\d)st/g, '$1 ')
+            s = s.replace(/(\d)nd/g, '$1 ')
+            s = s.replace(/(\d)rd/g, '$1 ')
+            s = s.replace(/(\d)th/g, '$1 ')
 
             # Split the date string into its components
             components = s.split(/\s+/)
@@ -502,6 +504,7 @@ class Calendar
             # Find the month component
             month = null
             for component, i in components.slice()
+
                 if month_names.hasOwnProperty(component)
                     month = month_names[component]
 
