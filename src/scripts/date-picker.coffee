@@ -347,7 +347,12 @@ class DateRangePicker extends BasePicker
         # Set up event listeners for the date picker
         for input in [@startInput, @endInput]
             $.listen input,
-                'blur': () => @close('blur')
+                'blur': () =>
+                    if @startInput is not document.activeElement and
+                            @endInput is not document.activeElement
+
+                        @close('blur')
+
                 'focus': (ev) => @open(ev.target)
                 'click': (ev) => @open(ev.target)
                 'change': (ev) =>
@@ -526,8 +531,20 @@ class DateRangePicker extends BasePicker
                 dateRangePicker.startInput.value = format(dateRange[0])
                 dateRangePicker.endInput.value = format(dateRange[1])
 
+
 module.exports = {
     Calendar: calendar.Calendar,
     DatePicker: DatePicker,
     DateRangePicker: DateRangePicker
     }
+
+# @@ Update all other packages to use the `clsPrefix` not `pkgPrefix` class
+#    property name.
+# @@ Refactor calendar, need to rethink if goto should trigger events in the way
+#    it does, we potentially need a reason for the goto (or a trigger) so that
+#    the event handler can determine if it needs to take action (we also need to
+#    review the sheer number goto events triggered.
+# @@ Start over on the date picker classes, define the key behaviours of the
+#    date picker range and make sure where needed these can be configured. It's
+#    just to complicated as it stands (the calenderOptionsParser isn't ideal
+#    either so lets see if we can improve on that).

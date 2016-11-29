@@ -486,13 +486,13 @@ class Calendar
             }
 
             # Clean up the date string removing commas as suffixes
-            s = s.trim()
             s = s.toLowerCase()
             s = s.replace(',', ' ')
             s = s.replace(/(\d)st/g, '$1 ')
             s = s.replace(/(\d)nd/g, '$1 ')
             s = s.replace(/(\d)rd/g, '$1 ')
             s = s.replace(/(\d)th/g, '$1 ')
+            s = s.trim()
 
             # Split the date string into its components
             components = s.split(/\s+/)
