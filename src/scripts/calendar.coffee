@@ -5,50 +5,50 @@ class Calendar
 
     # A calendar from which a date can be selected.
 
+    @getDefaultConfig: () ->
+        # Return the default configuration options for the `Calendar` class
+        return {
+            # Typically a list of dates, the `dates` option is used in
+            # conjunction with the `test` behaviour to determine which dates
+            # can be picked.
+            dates: [],
+
+            # The earliest date that can be selected
+            minDate: null,
+
+            # The latest date that can be selected
+            maxDate: null,
+
+            # The weekday that will be displayed first in the calendar view.
+            # Weekday must be a number between 0 (Sunday) and 6 (Saturday).
+            firstWeekday: 1,
+
+            # A list of all month names that will be used when displaying
+            # the month (must contain exactly 12 names).
+            monthNames: [
+                'January',
+                'February',
+                'March',
+                'April',
+                'May',
+                'June',
+                'July',
+                'August',
+                'September',
+                'October',
+                'November',
+                'December'
+                ],
+
+            # A list of weekday names that will be used when displaying the
+            # days of the week (must contain exactly 7 names).
+            weekdayNames: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+            }
+
     constructor: (parent, options={}) ->
 
         # Configure the instance
-        $.config(
-            this,
-            {
-                # Typically a list of dates, the `dates` option is used in
-                # conjunction with the `test` behaviour to determine which dates
-                # can be picked.
-                dates: [],
-
-                # The earliest date that can be selected
-                minDate: null,
-
-                # The latest date that can be selected
-                maxDate: null,
-
-                # The weekday that will be displayed first in the calendar view.
-                # Weekday must be a number between 0 (Sunday) and 6 (Saturday).
-                firstWeekday: 1,
-
-                # A list of all month names that will be used when displaying
-                # the month (must contain exactly 12 names).
-                monthNames: [
-                    'January',
-                    'February',
-                    'March',
-                    'April',
-                    'May',
-                    'June',
-                    'July',
-                    'August',
-                    'September',
-                    'October',
-                    'November',
-                    'December'
-                    ],
-
-                # A list of weekday names that will be used when displaying the
-                # days of the week (must contain exactly 7 names).
-                weekdayNames: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-            },
-            options
-            )
+        $.config(this, Calendar.getDefaultConfig(), options)
 
         # Set up and configure behaviours
         @_behaviours = {}
@@ -175,37 +175,48 @@ class Calendar
 
     goto: (month, year, dispatchEvent=true) =>
         # Display the given month, year in the calendar
+
+        # If the month and year match then there's nothing to do
+        if @_month == month and year == @_year
+            return
+
+        # Update the view
         @_month = month
         @_year = year
         @update()
 
         # Dispatch a goto event against the calendar
-        if dispatchEvent
-            $.dispatch(
-                @calendar,
-                @_et('goto'),
-                {'calendar': this, 'month': month, 'year': year}
-                )
+        $.dispatch(
+            @calendar,
+            @_et('view'),
+            {'calendar': this, 'month': month, 'year': year}
+            )
 
-    next: (dispatchEvent=true) ->
+    next: () ->
         # Display the next month in the calendar
-        month = @month + 1
-        year = @year
+        @offset(1)
 
-        if month > 11
-            month = 1
-            year += 1
+    offset: (months, years=0) ->
+        # Display the given offset (from the current month, year) in the
+        # calendar.
 
-        @goto(month, year, dispatchEvent)
+        # Apply the offset
+        month = @month + months
+        year = @year + years
 
-    previous: (dispatchEvent=true) ->
-        # Display the previous month in the calendar
-        month = @month - 1
-        year = @year
+        # Cater for months rotating the year
         if month < 0
             month = 11
             year -= 1
-        @goto(month, year, dispatchEvent)
+        else if month > 11
+            month = 1
+            year += 1
+
+        @goto(month, year)
+
+    previous: () ->
+        # Display the previous month in the calendar
+        @offset(-1)
 
     select: (startDate, endDate=null) ->
         # Set the selected date/date range for the calendar
@@ -316,6 +327,44 @@ class Calendar
             date = @parsers[parser](s)
             if date
                 return date
+
+    @proxyOptions: (prefix, options, input, dateParsers) ->
+        # Compile a set of options for the calendar based on a set of user
+        # defined options and an input element.
+        #
+        # The `proxyOptions` method is typically used by classes using one or
+        # more instances of the `Calendar` class and wishing to configure it
+        # through their own config options and input.
+
+        # Initially we configure a set of proxy options
+        proxy = {}
+        $.config(proxy, Calendar.getDefaultConfig(), options, input, prefix)
+
+        # Data options passed as strings need to be converted to native JS types
+
+        _parse = (s, parsers) ->
+            # Attempt to parse a string to a date
+            return @parseDate(s, parsers)
+
+        _split = (s) ->
+            # Convert a comma separated list of values to a native list
+            return (v.trim() for v in s.split(',') when v.trim())
+
+        # Convert comma separated strings to native lists
+        for option in ['dates', 'monthNames', 'parsers', 'weekdayNames']
+            if typeof(proxy[option]) is 'string'
+                proxy[option] = _split(proxy[option])
+
+        # Convert date strings to native dates
+        if typeof(proxy.minDate) is 'string'
+            proxy.minDate = _parse(proxy.minDate, proxy.parsers)
+
+        if typeof(proxy.maxDate) is 'string'
+            proxy.maxDate = _parse(proxy.maxDate, proxy.parsers)
+
+        proxy.dates = (_parse(v) for v in proxy.dates when _proxy(v))
+
+        return proxy
 
     # Behaviours
 
