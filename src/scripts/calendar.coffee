@@ -171,7 +171,8 @@ class Calendar
 
     destroy: () =>
         # Destroy the calendar (remove it from the DOM)
-        @parent.removeChild(@calendar)
+        if @calendar.parentNode == @parent
+            @parent.removeChild(@calendar)
 
     goto: (month, year, dispatchEvent=true) =>
         # Display the given month, year in the calendar
