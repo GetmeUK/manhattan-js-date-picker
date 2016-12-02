@@ -27,10 +27,10 @@
         <script>
             var startInput = document.getElementsByName('start_date')[0];
             var endInput = document.getElementsByName('end_date')[0];
-            var calendar = new ManhattanDatePicker.DatePicker(
-                startInput
+            var calendar = new ManhattanDatePicker.DateRangePicker(
+                startInput,
+                endInput
                 );
-
         </script>
     </body>
 </html>

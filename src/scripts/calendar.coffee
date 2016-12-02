@@ -227,6 +227,30 @@ class Calendar
 
         @update()
 
+    sync: (otherCalendar, months, years=0) ->
+        # Sync this calendar view with another with the given offset
+
+        # Determine the view we need to display to be in sync
+        month = otherCalendar.month + months
+        year =  otherCalendar.year + years
+
+        # Cater for months rotating the year
+        if month < 0
+            month = 11
+            year -= 1
+        else if month > 11
+            month = 1
+            year += 1
+
+        # If the month and year match then there's nothing to do
+        if @_month == month and year == @_year
+            return
+
+        # Update the view
+        @_month = month
+        @_year = year
+        @update()
+
     update: () ->
         # Update the calendar based on the current date range
 

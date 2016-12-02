@@ -69,6 +69,7 @@ class DatePicker extends BasePicker
     @clsPrefix: 'data-mh-date-picker--'
 
     constructor: (input, options={}) ->
+        super()
 
         # Configure the instance
         $.config(
@@ -133,7 +134,8 @@ class DatePicker extends BasePicker
 
         # Set up event listeners for the date picker
         $.listen @input,
-            'blur': () => @close('blur')
+            'blur': () =>
+                @close('blur')
             'click': () => @open()
             'focus': () => @open()
 
@@ -142,19 +144,19 @@ class DatePicker extends BasePicker
                 # and replace the value with a formatted date.
                 date = Calendar.parseDate(@input.value, @parsers)
                 if date
-                    @pick(date, {'source': 'input'})
+                    @pick(date, 'input')
 
         # Set up event listeners for the calendar
         eventListeners = {}
         eventListeners[@calendar._et('pick')] = (ev) =>
-            @pick(ev.date, {'source': 'calendar'})
+            @pick(ev.date, 'calendar')
 
         $.listen(@calendar.calendar, eventListeners)
 
     # Public methods
 
     close: (reason) ->
-        super('mh-date-picker')
+        super(@input, 'mh-date-picker', reason)
 
     open: () =>
         # Open the date picker
@@ -178,14 +180,14 @@ class DatePicker extends BasePicker
         # Dispatch an open event
         $.dispatch(@input, @_et('open'))
 
-    pick: (date) ->
+    pick: (date, source='') ->
         # Pick a date
 
         # Select the date in the calendar
         @calendar.select(date)
 
         # Dispatch a pick event against the input
-        if $.dispatch(@input, @_et('pick'), {'date': date})
+        if $.dispatch(@input, @_et('pick'), {'date': date, 'source': source})
 
             # Set the date value
             @constructor.behaviours.input[@_behaviours.input](this, date)
@@ -248,6 +250,7 @@ class DateRangePicker extends BasePicker
     @clsPrefix: 'data-mh-date-range-picker--'
 
     constructor: (startInput, endInput, options={}) ->
+        super()
 
         # Configure the instance
         $.config(
@@ -312,8 +315,8 @@ class DateRangePicker extends BasePicker
         # Setup the calendars for the date range picker
         proxyOptions = Calendar.proxyOptions(options, startInput)
         @_calendars = [
-            new calendar.Calendar(@_dom.picker, proxyOptions)
-            new calendar.Calendar(@_dom.picker, proxyOptions)
+            new Calendar(@_dom.picker, proxyOptions)
+            new Calendar(@_dom.picker, proxyOptions)
             ]
 
         # Flag indicating which date (start or end) we're picking in the range
@@ -328,8 +331,16 @@ class DateRangePicker extends BasePicker
         # Set up event listeners for the date picker
         for input in [@startInput, @endInput]
             $.listen input,
-                'click': (ev) => @open()
-                'focus': (ev) => @open()
+                'click': (ev) ->
+                    ev.target.focus()
+
+                'focus': (ev) =>
+                    # Flag the date that's being picked
+                    if ev.target is @startInput
+                        @_picking = 'start'
+                    else
+                        @_picking = 'end'
+                    @open()
 
                 'blur': () =>
                     # Check if the active element is one of the picker's inputs
@@ -344,32 +355,127 @@ class DateRangePicker extends BasePicker
                 'change': (ev) =>
                     # When the input changes attempt to parse its value as a
                     # date and replace the value with a fixed format date.
-                    s = ev.target.value
-                    date = calendar.Calendar.parseDate(s, @parsers)
+
+                    # Parse the date
+                    date = Calendar.parseDate(ev.target.value, @parsers)
                     if date
-                        @pick(date, {'source': 'input'})
+
+                        # Build the date range
+                        dateRange = @calendars[0].dateRange
+                        if @picking is 'start'
+                            dateRange[0] = date
+                        else
+                            dateRange[1] = date
+
+                        @pick(dateRange, {'source': 'input'})
 
         # Set up event listeners for the calendar
         eventListeners = {}
 
         eventListeners[@calendars[0]._et('pick')] = (ev) =>
-            @pick(ev.date, {'source': 'calendar'})
 
-        eventListeners[@calendars[0]._et('goto')] = (ev) =>
+            # Build the date range
+            dateRange = @calendars[0].dateRange
+            if @picking is 'start'
+                dateRange[0] = ev.date
+            else
+                dateRange[1] = ev.date
+
+            @pick(dateRange, {'source': 'calendar'})
+
+        eventListeners[@calendars[0]._et('view')] = (ev) =>
             # Make sure the adjacent calendar is one month on
             if @calendars.indexOf(ev.calendar) is 0
-                @calendars[1].goto(@calendars[0].month)
+                @calendars[1].sync(@calendars[0], 1)
             else
-                @calendars[0].goto(@calendars[1].month)
+                @calendars[0].sync(@calendars[1], -1)
 
         $.listen(@calendars[0].calendar, eventListeners)
         $.listen(@calendars[1].calendar, eventListeners)
 
-
     # Public methods
 
     close: (reason) ->
-        super('mh-date-range-picker')
+        super(@startInput, 'mh-date-range-picker', reason)
+
+    open: () ->
+        # Open the date range picker
+
+        # Determine which input the picker is being open against
+        input = @startInput
+        if @picking == 'end'
+            input = @endInput
+
+        # Parse the date inputs and build a date range to select in the
+        # calendars.
+        startDate = Calendar.parseDate(@startInput.value, @parsers)
+        endDate = Calendar.parseDate(@endInput.value, @parsers)
+        dateRange = @calendars[0].dateRange
+        if startDate
+            dateRange[0] = startDate
+        if endDate
+            dateRange[1] = endDate
+
+        # Set the date range (min/max) that the user can select from and the
+        # view the calendar will present.
+        minDate = null
+        maxDate = null
+        viewDate = null
+        if @picking == 'start'
+            maxDate = dateRange[1]
+            viewDate = dateRange[0]
+        else
+            minDate = dateRange[0]
+            viewDate = dateRange[1]
+
+        # Select the date range and limits in the calendars
+        for calendar in @calendars
+            calendar.minDate = minDate
+            calendar.maxDate = maxDate
+            calendar.select(dateRange[0], dateRange[1])
+
+        # Set the calendar views
+        if @picking == 'start'
+            @calendars[0].goto(viewDate.getMonth(), viewDate.getFullYear())
+        else
+            @calendars[1].goto(viewDate.getMonth(), viewDate.getFullYear())
+
+        # Track the position of the typeahead inline with the input
+        @_track(if @pinToStart then @startInput else input)
+
+        # Display the date picker visually
+        closedClass = @_bem('mh-date-range-picker', '', 'closed')
+        @_dom.picker.classList.remove(closedClass)
+
+        # Flag the typeahead as open
+        @_isOpen = true
+
+        # Dispatch an open event
+        $.dispatch(@startInput, @_et('open'))
+
+    pick: (dateRange, source) ->
+        # Pick a date
+
+        # Set the date range for both calendar
+        for calendar in @calendars
+            calendar.select(dateRange[0], dateRange[1])
+
+        # Dispatch a pick event against the input
+        evData = {'dateRange': dateRange, 'source': source}
+        if $.dispatch(@startInput, @_et('pick'), evData)
+
+            # Set the date value
+            @constructor.behaviours.input[@_behaviours.input](this, dateRange)
+
+            # Close the date picker if configured to
+            if @closeOnPick
+                @close()
+
+        # Switch the focus to the next date input
+        if @picking is 'start'
+            @endInput.focus()
+        else
+            @startInput.focus()
 
     # Private methods
 
@@ -401,12 +507,3 @@ module.exports = {
     DatePicker: DatePicker,
     DateRangePicker: DateRangePicker
     }
-
-
-# --
-# @@ Close isn't working :/ needs to be send input for different types
-#
-# @@ Shared interfaces
-#   . constructor /
-#   . open /
-#   . pick /
