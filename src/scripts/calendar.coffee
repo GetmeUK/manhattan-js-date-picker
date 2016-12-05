@@ -174,7 +174,7 @@ class Calendar
         if @calendar.parentNode == @parent
             @parent.removeChild(@calendar)
 
-    goto: (month, year, dispatchEvent=true) =>
+    goto: (month, year) =>
         # Display the given month, year in the calendar
 
         # If the month and year match then there's nothing to do
@@ -201,18 +201,27 @@ class Calendar
         # Display the given offset (from the current month, year) in the
         # calendar.
 
-        # Apply the offset
-        month = @month + months
-        year = @year + years
+        # Handle month offsets in excess of 1 year (12 months)
+        if months > 0
+            years += Math.floor(Math.abs(months) / 12)
+        else
+            years -= Math.floor(Math.abs(months) / 12)
+        months = months % 12
 
-        # Cater for months rotating the year
+        # Calculate the new month, year
+        month = @_month + months
+        year = @_year + years
+
+        # Handle rotating the year when the month value is < 0 or > 11
         if month < 0
-            month = 11
+            month = 12 + month
             year -= 1
+
         else if month > 11
-            month = 1
+            month = month - 12
             year += 1
 
+        # Apply the offset
         @goto(month, year)
 
     previous: () ->
@@ -231,16 +240,24 @@ class Calendar
     sync: (otherCalendar, months, years=0) ->
         # Sync this calendar view with another with the given offset
 
-        # Determine the view we need to display to be in sync
-        month = otherCalendar.month + months
-        year =  otherCalendar.year + years
+        # Handle month offsets in excess of 1 year (12 months)
+        if months > 0
+            years += Math.floor(Math.abs(months) / 12)
+        else
+            years -= Math.floor(Math.abs(months) / 12)
+        months = months % 12
 
-        # Cater for months rotating the year
+        # Calculate the new month, year
+        month = otherCalendar.month + months
+        year = otherCalendar.year + years
+
+        # Handle rotating the year when the month value is < 0 or > 11
         if month < 0
-            month = 11
+            month = 12 + month
             year -= 1
+
         else if month > 11
-            month = 1
+            month = month - 12
             year += 1
 
         # If the month and year match then there's nothing to do
@@ -353,27 +370,36 @@ class Calendar
             if date
                 return date
 
-    @proxyOptions: (prefix, options, input, dateParsers) ->
-        # Compile a set of options for the calendar based on a set of user
+    @proxyOptions: (prefix, options, input) ->
+        # Return a set of config options for the calendar based on a set of user
         # defined options and an input element.
         #
         # The `proxyOptions` method is typically used by classes using one or
         # more instances of the `Calendar` class and wishing to configure it
         # through their own config options and input.
 
+        # We add a default empty list of date parsers to the proxy to allow this
+        # to be configured by the caller.
+        defaults = Calendar.getDefaultConfig()
+        defaults.parsers = []
+
         # Initially we configure a set of proxy options
         proxy = {}
-        $.config(proxy, Calendar.getDefaultConfig(), options, input, prefix)
+        $.config(proxy, defaults, options, input, prefix)
 
         # Data options passed as strings need to be converted to native JS types
 
         _parse = (s, parsers) ->
             # Attempt to parse a string to a date
-            return @parseDate(s, parsers)
+            return Calendar.parseDate(s, parsers)
 
         _split = (s) ->
             # Convert a comma separated list of values to a native list
             return (v.trim() for v in s.split(',') when v.trim())
+
+        # Convert numbers
+        if typeof(proxy.firstWeekday) is 'string'
+             proxy.firstWeekday = Number(proxy.firstWeekday)
 
         # Convert comma separated strings to native lists
         for option in ['dates', 'monthNames', 'parsers', 'weekdayNames']
@@ -387,7 +413,11 @@ class Calendar
         if typeof(proxy.maxDate) is 'string'
             proxy.maxDate = _parse(proxy.maxDate, proxy.parsers)
 
-        proxy.dates = (_parse(v) for v in proxy.dates when _proxy(v))
+        proxy.dates = (_parse(v, proxy.parsers) for v in proxy.dates \
+                when _parse(v, proxy.parsers))
+
+        # Remove parsers from the proxy
+        delete proxy.parsers
 
         return proxy
 
@@ -497,9 +527,9 @@ class Calendar
                 return
 
             # Generate a date
-            year = parseInt(match[5])
-            month = parseInt(match[3]) - 1
-            day = parseInt(match[1])
+            year = Number(match[5])
+            month = Number(match[3]) - 1
+            day = Number(match[1])
 
             # If the year doesn't contain the century then we add the current
             # century to it.
@@ -519,6 +549,7 @@ class Calendar
         'human_en': (s) ->
             # Return a date from a string using a human readable format, e.g:
             #
+            # - `2nd`
             # - `1 Aug`
             # - `15 Feb 17`
             # - `January 22, 2011`
@@ -571,53 +602,65 @@ class Calendar
             # Split the date string into its components
             components = s.split(/\s+/)
 
-            # Check there are 2 or 3 components
-            if components.length isnt 2 and components.length isnt 3
+            # Check there is not more than 3 components
+            if components.length > 3
                 return
 
-            # Find the month component
-            month = null
-            for component, i in components.slice()
+            # If there's only one component then this must be the day so we
+            # default the year and month to the current until we determine the
+            # number of components.
+            month = (new Date()).getMonth()
+            year = (new Date()).getFullYear()
 
-                if month_names.hasOwnProperty(component)
-                    month = month_names[component]
+            # If we're dealing with more than one component we need to attempt
+            # to extract the month (2+ components) and year (3 components).
+            if components.length > 1
 
-                else if month_short_names.hasOwnProperty(component)
-                    month = month_short_names[component]
+                # Find the month component
+                month = null
+                for component, i in components.slice()
 
-                if month isnt null
-                    components.splice(i, 1)
-                    break
+                    if month_names.hasOwnProperty(component)
+                        month = month_names[component]
 
-            if not month
-                return
+                    else if month_short_names.hasOwnProperty(component)
+                        month = month_short_names[component]
 
-            # Find a 4 digit year
-            year = null
-            for component, i in components.slice()
-                if component.length == 4
-                    year = parseInt(component)
-                    components.splice(i, 1)
-                    break
+                    if month isnt null
+                        components.splice(i, 1)
+                        break
 
-            # Check for 2 digit year
-            if year is null and components.length == 2
-                year = parseInt(components[1])
-                components.splice(1, 1)
+                if month is null
+                    return
 
-            if year is null
-                year = (new Date()).getFullYear()
+                # Find a 4 digit year
+                year = null
+                for component, i in components.slice()
+                    if component.length == 4
+                        year = Number(component)
+                        components.splice(i, 1)
+                        break
 
-            if year is NaN
-                return
+                # Check for 2 digit year
+                if year is null and components.length == 2
+                    year = Number(components[1])
+                    components.splice(1, 1)
 
-            # If the year doesn't contain the century then we add the current
-            # century to it.
-            if year < 100
-                year += parseInt((new Date()).getFullYear() / 100) * 100
+                if year is NaN
+                    return
+
+                # Default to the current year
+                if year is null
+                    year = (new Date()).getFullYear()
+
+                # If the year doesn't contain the century then we add the
+                # current century to it.
+                if year < 100
+                    year += parseInt((new Date()).getFullYear() / 100) * 100
 
             # All that's left is the day
-            day = parseInt(components[0])
+            day = Number(components[0])
+
             if day is NaN
                 return
 
@@ -642,9 +685,9 @@ class Calendar
                 return
 
             # Generate a date
-            year = parseInt(match[1])
-            month = parseInt(match[2]) - 1
-            day = parseInt(match[3])
+            year = Number(match[1])
+            month = Number(match[2]) - 1
+            day = Number(match[3])
 
             date = new Date(year, month, day)
 
@@ -667,9 +710,9 @@ class Calendar
                 return
 
             # Generate a date
-            year = parseInt(match[5])
-            month = parseInt(match[1]) - 1
-            day = parseInt(match[3])
+            year = Number(match[5])
+            month = Number(match[1]) - 1
+            day = Number(match[3])
 
             # If the year doesn't contain the century then we add the current
             # century to it.
