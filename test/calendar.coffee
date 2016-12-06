@@ -288,10 +288,54 @@ describe 'Calendar (class)', ->
 
 describe 'Calendar (options)', ->
 
-    # dates
-    # minDate
-    # maxDate
-    # firstWeekday
+    jsdom()
+
+    describe 'dates', ->
+
+        # `dates` isn't tested as an option as it is covered under tests for the
+        # `test` behaviour.
+
+    describe 'minDate', ->
+
+        it 'should set all dates before the minimum date as blocked', ->
+
+            minDate = new Date(10, 0, 2000)
+            calendar = new Calendar(document.body, {minDate: minDate})
+            calendar.goto(0, 2000)
+
+            for dateElm in calendar._dom.dates.childNodes
+                if dateElm.__mh_date.getTime() < minDate.getTime()
+                    dateElm.classList.contains(
+                        'mh-calendar__date--blocked').should.be.true
+
+    describe 'maxDate', ->
+
+        it 'should set all dates after the maximum date as blocked', ->
+
+            maxDate = new Date(20, 0, 2000)
+            calendar = new Calendar(document.body, {maxDate: maxDate})
+            calendar.goto(0, 2000)
+
+            for dateElm in calendar._dom.dates.childNodes
+                if dateElm.__mh_date.getTime() > maxDate.getTime()
+                    dateElm.classList.contains(
+                        'mh-calendar__date--blocked').should.be.true
+
+    describe 'firstWeekday', ->
+
+        it 'should set first weekday displayed in the calendar view', ->
+
+            maxDate = new Date(20, 0, 2000)
+            calendar = new Calendar(document.body, {firstWeekday: 0})
+            calendar.goto(0, 2000)
+
+            # Check the order of the weekdays
+            weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+            for weekdayElm, i in calendar._dom.weekdays
+                weekdayElm.textContent.should.equal weekdays[i]
+
+            # @@ Check that every 7th date is a Sunday
+
     # monthNames
     # weekdayNames
 

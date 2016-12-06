@@ -1,6 +1,6 @@
 {
   "name": "manhattan-date-picker",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Date picker support for form fields.",
   "main": "dist/index.js",
   "scripts": {

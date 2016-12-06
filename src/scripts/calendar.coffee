@@ -399,7 +399,7 @@ class Calendar
 
         # Convert numbers
         if typeof(proxy.firstWeekday) is 'string'
-             proxy.firstWeekday = Number(proxy.firstWeekday)
+            proxy.firstWeekday = Number(proxy.firstWeekday)
 
         # Convert comma separated strings to native lists
         for option in ['dates', 'monthNames', 'parsers', 'weekdayNames']
