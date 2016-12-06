@@ -334,15 +334,125 @@ describe 'Calendar (options)', ->
             for weekdayElm, i in calendar._dom.weekdays
                 weekdayElm.textContent.should.equal weekdays[i]
 
-            # @@ Check that every 7th date is a Sunday
+            # Check that every 7th date is a Sunday
+            for weekdayElm, i in calendar._dom.weekdays
+                if i % 7 is 0
+                    weekdayElm.__mh_date.getDay().should.equal 0
 
-    # monthNames
-    # weekdayNames
+    describe 'monthNames', ->
+
+        it 'should set the month names displayed in the calendar view', ->
+
+            monthNames = 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec'
+            monthNames = monthNames.split(',')
+            calendar = new Calendar(document.body, {monthNames: monthNames})
+
+            monthElm = calendar._dom.month
+            for name, i in monthNames
+                calendar.goto(i, 2000)
+                monthElm.textContent.should.equal "#{name}, 2000"
+
+    describe 'weekdayNames', ->
+
+        it 'should set the weekday names displayed in the calendar view', ->
+
+            weekdayNames = 'Su,Mo,Tu,We,Th,Fr,Sa'.split(',')
+            calendar = new Calendar(
+                document.body,
+                {
+                    firstWeekday: 0,
+                    weekdayNames: weekdayNames
+                }
+            )
+
+            weekdaysElm = calendar._dom.weekdays
+            for name, i in weekdayNames
+                calendar.goto(i, 2000)
+                weekdayElm = weekdaysElm.childNodes[i]
+                weekdayElm.textContent.should.equal name
 
 
 describe 'Calendar (behaviours)', ->
 
-    # test
+    jsdom()
+
+    calendar = null
+
+    beforeEach ->
+        # Initialize a calendar
+        calendar = new Calendar(document.body)
+        calendar.goto(0, 2000)
+
+    describe 'test', ->
+
+        describe 'any', ->
+
+            it 'should return true for any date', ->
+
+                behaviour = Calendar.behaviours.test.any
+                date = new Date(2000, 0, 1)
+                for i in [0..365]
+                    behaviour(calendar, [], date).should.be.true
+                    date.setDate(date.getDate() + 1)
+
+
+        describe 'excluding', ->
+
+            it 'should return true only for dates not in the `dates` config
+                option', ->
+
+                behaviour = Calendar.behaviours.test.excluding
+                date = new Date(2000, 0, 1)
+                dates = [
+                    new Date(2000, 1, 1),
+                    new Date(2000, 2, 2),
+                    new Date(2000, 3, 3)
+                    ]
+                times = (d.getTime() for d in dates)
+
+                for i in [0..365]
+                    if times.indexOf(date.getTime()) > -1
+                        behaviour(calendar, dates, date).should.be.false
+                    else
+                        behaviour(calendar, dates, date).should.be.true
+                    date.setDate(date.getDate() + 1)
+
+        describe 'only', ->
+
+            it 'should return true only for dates in the `dates` config
+                option', ->
+
+                behaviour = Calendar.behaviours.test.only
+                date = new Date(2000, 0, 1)
+                dates = [
+                    new Date(2000, 1, 1),
+                    new Date(2000, 2, 2),
+                    new Date(2000, 3, 3)
+                    ]
+                times = (d.getTime() for d in dates)
+
+                for i in [0..365]
+                    if times.indexOf(date.getTime()) > -1
+                        behaviour(calendar, dates, date).should.be.true
+                    else
+                        behaviour(calendar, dates, date).should.be.false
+                    date.setDate(date.getDate() + 1)
+
+        describe 'weekdays', ->
+
+            it 'should return true only for dates in that fall on the weekdays
+                in the `dates` config option', ->
+
+                behaviour = Calendar.behaviours.test.weekdays
+                date = new Date(2000, 0, 1)
+                weekdays = [0, 6]
+
+                for i in [0..365]
+                    if weekdays.indexOf(date.getDay()) > -1
+                        behaviour(calendar, weekdays, date).should.be.true
+                    else
+                        behaviour(calendar, weekdays, date).should.be.false
+                    date.setDate(date.getDate() + 1)
 
 
 describe 'Calendar (formats)', ->

@@ -110,7 +110,7 @@ class DatePicker extends BasePicker
         # Store a reference to the input the date picker is being applied to (we
         # also store a reverse reference to this instance against the input).
         @_dom.input = input
-        @_dom.input.__mh_typeahead = this
+        @_dom.input.__mh_datePicker = this
 
         # Build the elements required for the picker
         @_dom.picker = $.create(
@@ -168,13 +168,13 @@ class DatePicker extends BasePicker
             @calendar.goto(date.getMonth(), date.getFullYear())
             @calendar.select(date)
 
-        # Track the position of the typeahead inline with the input
+        # Track the position of the picker inline with the input
         @_track()
 
         # Display the date picker visually
         @_dom.picker.classList.remove(@_bem('mh-date-picker', '', 'closed'))
 
-        # Flag the typeahead as open
+        # Flag the picker as open
         @_isOpen = true
 
         # Dispatch an open event
@@ -308,9 +308,9 @@ class DateRangePicker extends BasePicker
         # to (we also store a reverse reference to this instance against the
         # inputs).
         @_dom.startInput = startInput
-        @_dom.startInput.__mh_typeahead = this
+        @_dom.startInput.__mh_dateRangePicker = this
         @_dom.endInput = endInput
-        @_dom.endInput.__mh_typeahead = this
+        @_dom.endInput.__mh_dateRangePicker = this
 
         # Setup the calendars for the date range picker
         proxyOptions = Calendar.proxyOptions(options, startInput)
@@ -436,18 +436,18 @@ class DateRangePicker extends BasePicker
 
         # Set the calendar views
         if @picking == 'start'
-            @calendars[0].goto(viewDate.getMonth(), viewDate.getFullYear())
-        else
             @calendars[1].goto(viewDate.getMonth(), viewDate.getFullYear())
+        else
+            @calendars[0].goto(viewDate.getMonth(), viewDate.getFullYear())
 
-        # Track the position of the typeahead inline with the input
+        # Track the position of the picker inline with the input
         @_track(if @pinToStart then @startInput else input)
 
         # Display the date picker visually
         closedClass = @_bem('mh-date-range-picker', '', 'closed')
         @_dom.picker.classList.remove(closedClass)
 
-        # Flag the typeahead as open
+        # Flag the picker as open
         @_isOpen = true
 
         # Dispatch an open event
