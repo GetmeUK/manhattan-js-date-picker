@@ -457,11 +457,40 @@ describe 'Calendar (behaviours)', ->
 
 describe 'Calendar (formats)', ->
 
-    # dmy
-    # human_en
-    # human_abbr_en
-    # iso
-    # mdy
+    describe 'dmy', ->
+
+        it 'should format a date as `dd/mm/yyyy`', ->
+
+            Calendar.formats.dmy(new Date(2000, 0, 2)).should.equal '02/01/2000'
+
+    describe 'human_en', ->
+
+        it 'should format a date as `{day} {full month name} {full year}`, e.g
+            `22 January 2011`', ->
+
+            s = Calendar.formats.human_en(new Date(2000, 0, 2))
+            s.should.equal '2 January 2000'
+
+    describe 'human_abbr_en', ->
+
+        it 'should format a date as
+            `{day} {abbreviated month name} {full year}`, e.g `22 Jan 2011`', ->
+
+            s = Calendar.formats.human_abbr_en(new Date(2000, 0, 2))
+            s.should.equal '2 Jan 2000'
+
+    describe 'dmy', ->
+
+        it 'should format a date as ISO 8601 (e.g `yyyy-mm-dd`)', ->
+
+            s = Calendar.formats.iso(new Date(2000, 0, 2))
+            s.should.equal '2000-01-02'
+
+    describe 'mdy', ->
+
+        it 'should format a date as `mm/dd/yyyy`', ->
+
+            Calendar.formats.mdy(new Date(2000, 0, 2)).should.equal '01/02/2000'
 
 
 describe 'Calendar (parsers)', ->
