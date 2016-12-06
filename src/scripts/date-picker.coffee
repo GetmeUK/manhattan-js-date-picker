@@ -416,28 +416,27 @@ class DateRangePicker extends BasePicker
         if endDate
             dateRange[1] = endDate
 
-        # Set the date range (min/max) that the user can select from and the
-        # view the calendar will present.
-        minDate = null
-        maxDate = null
-        viewDate = null
-        if @picking == 'start'
-            maxDate = dateRange[1]
-            viewDate = dateRange[0]
-        else
-            minDate = dateRange[0]
-            viewDate = dateRange[1]
+        # If the start date is after the end date then set the value of the
+        # start input and focus on the end input.
+        if dateRange[1] < dateRange[0]
+            @pick([dateRange[1], dateRange[0]])
+            @endInput.focus()
+            return
 
-        # Select the date range and limits in the calendars
+        # Select the current date range
         for calendar in @calendars
-            calendar.minDate = minDate
-            calendar.maxDate = maxDate
             calendar.select(dateRange[0], dateRange[1])
 
-        # Set the calendar views
-        if @picking == 'start'
-            @calendars[1].goto(viewDate.getMonth(), viewDate.getFullYear())
-        else
+        # If neither calendar contains the start or end date in the range then
+        # set the first calendar to show the start date.
+        startStr = "#{dateRange[0].getMonth()}.#{dateRange[0].getFullYear()}"
+        endStr = "#{dateRange[1].getMonth()}.#{dateRange[1].getFullYear()}"
+        viewStrs = [
+            "#{@calendars[0].month}.#{@calendars[0].year}",
+            "#{@calendars[1].month}.#{@calendars[1].year}"
+            ]
+        if viewStrs.indexOf(startStr) is -1 and viewStrs.indexOf(endStr) is -1
+            viewDate = dateRange[0]
             @calendars[0].goto(viewDate.getMonth(), viewDate.getFullYear())
 
         # Track the position of the picker inline with the input

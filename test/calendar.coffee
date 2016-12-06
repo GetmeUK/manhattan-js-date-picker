@@ -495,7 +495,61 @@ describe 'Calendar (formats)', ->
 
 describe 'Calendar (parsers)', ->
 
-    # dmy
-    # human_en
-    # iso
-    # mdy
+    month = new Date().getMonth()
+    time = new Date(2000, 0, 2).getTime()
+    year = new Date().getFullYear()
+
+    describe 'dmy', ->
+
+        it 'should parse a date string using the format `d/m/y`', ->
+            Calendar.parsers.dmy('2/1/00').getTime().should.equal time
+            Calendar.parsers.dmy('2/1/2000').getTime().should.equal time
+            Calendar.parsers.dmy('02/01/2000').getTime().should.equal time
+
+        it 'should parse a date string using the format `d.m.y`', ->
+            Calendar.parsers.dmy('2.01.00').getTime().should.equal time
+
+        it 'should parse a date string using the format `d-m-y`', ->
+            Calendar.parsers.dmy('2-1-00').getTime().should.equal time
+
+    describe 'human_en', ->
+
+        # A series of human readable dates formats that must be parsed
+
+        it 'should parse `2nd`', ->
+            date = Calendar.parsers.human_en('2nd')
+            date.getTime().should.equal (new Date(year, month, 2)).getTime()
+
+        it 'should parse `1 Aug`', ->
+            date = Calendar.parsers.human_en('1 Aug')
+            date.getTime().should.equal (new Date(year, 7, 1)).getTime()
+
+        it 'should parse `15 Feb 17`', ->
+            date = Calendar.parsers.human_en('15 Feb 17')
+            date.getTime().should.equal (new Date(2017, 1, 15)).getTime()
+
+        it 'should parse `January 22, 2011`', ->
+            date = Calendar.parsers.human_en('January 22, 2011')
+            date.getTime().should.equal (new Date(2011, 0, 22)).getTime()
+
+        it 'should parse `Nov 22`', ->
+            date = Calendar.parsers.human_en('Nov 22')
+            date.getTime().should.equal (new Date(year, 10, 22)).getTime()
+
+    describe 'iso', ->
+
+        it 'should parse a date string using the format `yyyy-mm-dd`', ->
+            Calendar.parsers.iso('2000-01-02').getTime().should.equal time
+
+    describe 'mdy', ->
+
+        it 'should parse a date string using the format `m/d/y`', ->
+            Calendar.parsers.mdy('1/2/00').getTime().should.equal time
+            Calendar.parsers.mdy('1/2/2000').getTime().should.equal time
+            Calendar.parsers.mdy('01/02/2000').getTime().should.equal time
+
+        it 'should parse a date string using the format `m.d.y`', ->
+            Calendar.parsers.mdy('1.2.00').getTime().should.equal time
+
+        it 'should parse a date string using the format `m-d-y`', ->
+            Calendar.parsers.mdy('1-2-00').getTime().should.equal time
