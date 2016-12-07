@@ -192,6 +192,9 @@ class DatePicker extends BasePicker
             # Set the date value
             @constructor.behaviours.input[@_behaviours.input](this, date)
 
+            # Dispatch a picked event
+            $.dispatch(@input, @_et('picked'), {'date': date, 'source': source})
+
             # Close the date picker if configured to
             if @closeOnPick
                 @close({'reason': 'pick'})
@@ -466,15 +469,18 @@ class DateRangePicker extends BasePicker
             # Set the date value
             @constructor.behaviours.input[@_behaviours.input](this, dateRange)
 
+            # Dispatch a picked event
+            $.dispatch(@startInput, @_et('picked'), evData)
+
+            # Switch the focus to the next date input
+            if @picking is 'start'
+                @endInput.focus()
+            else
+                @startInput.focus()
+
             # Close the date picker if configured to
             if @closeOnPick
                 @close()
-
-        # Switch the focus to the next date input
-        if @picking is 'start'
-            @endInput.focus()
-        else
-            @startInput.focus()
 
     # Private methods
 
