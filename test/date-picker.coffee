@@ -7,7 +7,6 @@ sinonChai = require 'sinon-chai'
 
 $ = require 'manhattan-essentials'
 DatePicker = require('../src/scripts/date-picker').DatePicker
-DateRangePicker = require('../src/scripts/date-picker').DateRangePicker
 
 
 # Set up
@@ -106,7 +105,7 @@ describe 'DatePicker (class)', ->
             closed = 'mh-date-picker--closed'
             pickerElm.classList.contains(closed).should.be.false
 
-        it 'should position the typeahead in-line with the input', ->
+        it 'should position the date picker in-line with the input', ->
 
             datePicker.open()
 
@@ -145,7 +144,7 @@ describe 'DatePicker (class)', ->
         it 'should set the value of the input to the picked date', ->
 
             datePicker.pick(date)
-            input.value = '3 Mar 2001'
+            input.value.should.equal '3 March 2001'
 
         it 'should dispatch a pick and picked event against the input', ->
 
