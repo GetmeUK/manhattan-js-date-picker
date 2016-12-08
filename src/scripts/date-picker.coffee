@@ -235,7 +235,7 @@ class DatePicker extends BasePicker
                     )
 
                 # Set the hidden fields value
-                hiddenDateStr = calendarCls.formats[hiddenFormat](date)
+                hiddenDateStr = Calendar.formats[hiddenFormat](date)
                 hidden.value = hiddenDateStr
 
             'set-value': (datePicker, date) ->
