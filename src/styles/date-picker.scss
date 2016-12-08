@@ -8,13 +8,11 @@ $half-date-size: $date-size / 2;
     -webkit-user-select: none;
 
     box-sizing: border-box;
+    float: left;
     font-family: sans-serif;
-    margin-top: 20px;
     padding: 10px;
     user-select: none;
-
     width: 300px;
-
 
     * {
         box-sizing: border-box;
@@ -26,14 +24,14 @@ $half-date-size: $date-size / 2;
     }
 
     &__month {
-        color: #7f7f7f;
+        color: #666;
         font-size: 18px;
         text-align: center;
     }
 
     &__next {
         border-bottom: 8px solid transparent;
-        border-left: 12px solid #9f9f9f;
+        border-left: 12px solid #334144;
         border-radius: 3px;
         border-top: 8px solid transparent;
         cursor: pointer;
@@ -47,7 +45,7 @@ $half-date-size: $date-size / 2;
     &__previous {
         border-bottom: 8px solid transparent;
         border-radius: 3px;
-        border-right: 12px solid #9f9f9f;
+        border-right: 12px solid #334144;
         border-top: 8px solid transparent;
         cursor: pointer;
         height: 0;
@@ -69,7 +67,7 @@ $half-date-size: $date-size / 2;
     }
 
     &__weekday {
-        color: #cfcfcf;
+        color: #999;
         float: left;
         font-size: 11px;
         font-weight: bold;
@@ -89,7 +87,7 @@ $half-date-size: $date-size / 2;
     }
 
     &__date {
-        color: #333;
+        color: #666;
         float: left;
         font-size: 14px;
         height: #{$date-size}px;
@@ -102,7 +100,7 @@ $half-date-size: $date-size / 2;
             cursor: pointer;
 
             &::after {
-                background: rgba(0, 0, 0, 0.05);
+                background: rgba(226, 106, 106, 0.1);
                 border-radius: #{$half-date-size}px;
                 content: '';
                 display: block;
@@ -111,15 +109,16 @@ $half-date-size: $date-size / 2;
                 position: absolute;
                 top: 0;
                 width: #{$date-size}px;
+                z-index: -1;
             }
         }
 
         &--in-range {
-            background: #c4f4f9;
+            background: rgba(226, 106, 106, 0.1);
         }
 
         &--range-start {
-            background: #91e9f1;
+            background: #e26a6a;
             border-bottom-left-radius: #{$half-date-size}px;
             border-top-left-radius: #{$half-date-size}px;
             color: #fff;
@@ -135,7 +134,7 @@ $half-date-size: $date-size / 2;
         }
 
         &--range-end {
-            background: #91e9f1;
+            background: #e26a6a;
             border-bottom-right-radius: #{$half-date-size}px;
             border-top-right-radius: #{$half-date-size}px;
             color: #fff;
@@ -155,7 +154,7 @@ $half-date-size: $date-size / 2;
         }
 
         &--blocked {
-            color: #9f9f9f;
+            color: #999;
             font-style: italic;
             font-weight: normal;
 
@@ -168,16 +167,40 @@ $half-date-size: $date-size / 2;
             }
         }
 
+        &--range-start.mh-calendar__date--blocked,
+        &--range-end.mh-calendar__date--blocked {
+            color: #fff;
+        }
     }
 }
 
 .mh-date-picker,
 .mh-date-range-picker {
+    background: #fff;
+    border: 1px solid #d4dce0;
+    border-radius: 3px;
+    margin-top: 10px;
     position: absolute;
     width: 300px;
     z-index: 4;
 
     &--closed {
         display: none;
+    }
+}
+
+.mh-date-range-picker {
+    width: 600px;
+
+    .mh-calendar:first-child {
+        .mh-calendar__next {
+            display: none;
+        }
+    }
+
+    .mh-calendar:nth-child(2) {
+        .mh-calendar__previous {
+            display: none;
+        }
     }
 }
