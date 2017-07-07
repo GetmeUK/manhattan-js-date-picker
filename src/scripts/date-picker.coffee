@@ -139,7 +139,11 @@ class DatePicker extends BasePicker
             'click': () => @open()
             'focus': () => @open()
 
-            'change': () =>
+            'change': (ev) =>
+                # Ignore the request if the caller is the date picker itself
+                if ev.caller is this
+                    return
+
                 # When the input changes attempt to parse its value as a date
                 # and replace the value with a formatted date.
                 date = Calendar.parseDate(@input.value, @parsers)
@@ -237,6 +241,7 @@ class DatePicker extends BasePicker
                 # Set the hidden fields value
                 hiddenDateStr = Calendar.formats[hiddenFormat](date)
                 hidden.value = hiddenDateStr
+                $.dispatch(hidden, 'change')
 
             'set-value': (datePicker, date) ->
                 # Set the value of the input to the formatted date
@@ -244,6 +249,13 @@ class DatePicker extends BasePicker
                 # Set the input's value
                 dateStr = Calendar.formats[datePicker.format](date)
                 datePicker.input.value = dateStr
+
+                # We trigger a change event to help other applications detect
+                # the change to the input field, we send the caller argument
+                # with the event to prevent the event trigger a infinite cycle.
+                $.dispatch(datePicker.input, 'change', {caller: datePicker})
+
+                console.log dateStr
 
 
 class DateRangePicker extends BasePicker
@@ -358,6 +370,10 @@ class DateRangePicker extends BasePicker
                 'change': (ev) =>
                     # When the input changes attempt to parse its value as a
                     # date and replace the value with a fixed format date.
+
+                    # Ignore the request if the caller is the date picker itself
+                    if ev.caller is this
+                        return
 
                     # Parse the date
                     date = Calendar.parseDate(ev.target.value, @parsers)
@@ -499,7 +515,17 @@ class DateRangePicker extends BasePicker
                 # Set the input values
                 format = Calendar.formats[dateRangePicker.format]
                 dateRangePicker.startInput.value = format(dateRange[0])
+                $.dispatch(
+                    dateRangePicker.startInput,
+                    'change',
+                    {caller: datePicker}
+                    )
                 dateRangePicker.endInput.value = format(dateRange[1])
+                $.dispatch(
+                    dateRangePicker.endInput,
+                    'change',
+                    {caller: datePicker}
+                    )
 
 
 module.exports = {
