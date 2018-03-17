@@ -278,8 +278,6 @@ class Calendar
         # Find the first weekday in the month
         weekday = new Date(@year, @month, 1).getDay()
 
-        console.log weekday, @firstWeekday
-
         # Determine the start date for the calendar month given the the first
         # day.
         daysOffset = weekday - @firstWeekday

@@ -284,45 +284,66 @@ export class Calendar {
      */
     _update() {
         // Update the month and year label
-        // @@
+        this._dom.month.textContent
+            = `${this.monthNames[this.month]}, ${this.year}`
 
-        // Find the first week day in the month
-        // @@
+        // Find the first date/day in the month
+        const date = new Date(this.year, this.month, 1).getDay()
 
         // Determine the start date for the month given the first weekday
         // preference.
-        // @@
+        let daysOffset = date.getDay() - this.firstWeekday
+        if (daysOffset < 0) {
+            daysOffset = 7 - Math.abs(daysOffset)
+        }
+        if (daysOffset > 0) {
+            date.setDate(date.getDate() - daysOffset)
+        }
 
         // Update the dates displayed
-        {css} = this.constructor
+        const {css} = this.constructor
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+
+        for (let i = 0; i < 42; i += 1) {
+            const dateElm = this._dom.dates.childNodes[i]
 
             // Set the date day
-            // @@
+            dateElm.textContent = date.getDate()
 
             // Associate the native date with the date element
-            // @@
+            dateElm._date = new Date(date.valueOf())
 
             // Reset the the CSS class for the date element (removing any
             // modifiers).
-            // @@
+            dateElm.setAttribute('class', css['date'])
 
             // Add any applicable CSS modifiers classes to the date element
-            classList = dateElm.classList
+            const {classList} = dateElm
 
             // Not in the current month (blocked)
-            // @@
+            if (date.getMonth() !== this.month) {
+                classList.add(css['blocked'])
+            }
 
             // Blocked by the dates test (blocked)
-            // @@
+            if (this.dateTest && !this.dateTest(date)) {
+                classList.add(css['blocked'])
+            }
 
             // Today's date
-            // @@
+            if (date.getTime() === today.getTime()) {
+                classList.add(css['today'])
+            }
 
             // Selected date
-            // @@
+            if (date.getTime() === this.date.getTime()) {
+                classList.add(css['today'])
+            }
 
             // Move the date on by 1 day
-            // @@
+            date.setDate(date.getDate() + 1)
+        }
 
         // Dispatch an updated event against the calendar
         $.dispatch(
@@ -382,6 +403,16 @@ Calendar.css = {
      * Applied to the calendar's 'previous month' navigation element.
      */
     'previous': 'mh-calendar__previous',
+
+    /**
+     * Applied to the selected date element when visible in the calendar view.
+     */
+    'selected': 'mh-calendar__date--selected',
+
+    /**
+     * Applied to the current date element when visible in the calendar view.
+     */
+    'today': 'mh-calendar__date--today',
 
     /**
      * Applied to a weekday heading in the calendar view.
