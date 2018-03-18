@@ -489,12 +489,3 @@ DatePicker.css = {
     'picker': 'mh-date-picker'
 
 }
-
-
-// @@ Behaviours for the calendar and the date picker?...
-// @@ ... or send settings through to parser, calendar using options? << *
-// @@ ... calendar would need to accept a function that it could call to
-//        determine which if any dates should be blocked.
-// @@ Behaviours for picker would be input and dateTest
-// @@ Date picker will now be responsible for providing a date test function
-//    that supports the date behaviour and the min/max dates.

@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <title>manhattan-date-picker</title>
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="date-picker.css"
+            >
+    </head>
+    <body>
+        <label>
+            Date
+            <input
+                name="date"
+                value=""
+                data-mh-data-picker
+                >
+        </label>
+
+        <script src="../node_modules/manhattan-essentials/umd/index.js"></script>
+        <script src="../umd/index.js"></script>
+        <script>
+
+            const $ = window['manhattan-essentials']
+
+            const DatePicker = window['manhattan-date-picker']
+                .datePicker
+                .DatePicker
+
+            for(let fieldElm of $.many('[data-mh-date-picker]')) {
+                let d = new DatePicker(fieldElm)
+                d.init()
+            }
+
+        </script>
+    </body>
+</html>

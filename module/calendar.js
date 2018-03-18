@@ -214,7 +214,8 @@ export class Calendar {
         // We build 6 rows of 7 days which allows a full month to always be
         // visible no matter its length what weekday it starts on.
         for (let i = 0; i < 42; i += 1) {
-            this._dom.dates
+            this._dom
+                .dates
                 .appendChild($.create('div', {'class': css['date']}))
         }
 
