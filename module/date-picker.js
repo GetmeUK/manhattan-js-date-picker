@@ -86,13 +86,46 @@ export class DatePicker {
             prefix
         )
 
-        // @@
-        // - parser month names
-        // - parser short month names
-        // - parser parsers
-        // - parser weekday names
-        // - parse min/max dates
-        // - parser dates
+        // Handle list based options
+        let _toArray = (s) => {
+            return s.split(',').map((v) => {
+                return v.trim()
+            })
+        }
+
+        if (typeof this._options.monthNames === 'string') {
+            this._options.monthNames = _toArray(this._options.monthNames)
+        }
+        if (typeof this._options.shortMonthNames === 'string') {
+            this._options.parsers = _toArray(this._options.parsers)
+        }
+        if (typeof this._options.shortMonthNames === 'string') {
+            this._options.shortMonthNames
+                = _toArray(this._options.shortMonthNames)
+        }
+        if (typeof this._options.shortMonthNames === 'string') {
+            this._options.weekdayNames = _toArray(this._options.weekdayNames)
+        }
+
+        // Handle date based options
+        let _toDate = (s) => {
+            return this.dateParser.parse(s, this._options.parsers)
+        }
+
+        if (typeof this._options.maxDate === 'string') {
+            this._options.maxDate = _toDate(this._options.maxDate)
+        }
+        if (typeof this._options.minDate === 'string') {
+            this._options.minDate = _toDate(this._options.minDate)
+        }
+        if (typeof this._options.dates === 'string') {
+            this._options.dates = this._options.dates.split(',').map((v) => {
+                return _toDate(v)
+            })
+            this._options.dates.filter((v) => {
+                return v !== null
+            })
+        }
 
         // Configure the behaviours
         this._behaviours = {}
@@ -203,7 +236,27 @@ export class DatePicker {
     }
 
     destroy() {
-        // @@
+        // Remove event listeners
+        $.ignore(
+            window,
+            {
+                'fullscreenchange': this._handlers.close,
+                'orientationchange': this._handlers.close,
+                'resize': this._handlers.close
+            }
+        )
+
+        $.ignore(
+            this.input,
+            {
+                'blur': this._handlers.close,
+                'change': this._handlers.pick,
+                'click': this._handlers.open,
+                'focus': this._handlers.open
+            }
+        )
+
+        $.ignore(this.calendar.calendar, {'picked': this._handlers.pick})
 
         // Remove the date parser
         this._dateParser = null
@@ -211,11 +264,19 @@ export class DatePicker {
         // Destroy the calendar
         this.calendar.destroy()
         this._calendar = null
+
+        // Remove the date picker element
+        document.body.removeChild(this._dom.picker)
+        this._dom.picker = null
     }
 
     init() {
         // Create the date picker element
-        // @@
+        this._dom.picker = $.create(
+            'div',
+            {'class': this.constructor.css['picker']}
+        )
+        document.body.appendChild(this._dom.picker)
 
         // Set up date parser
         this._dateParser = new DateParser(
@@ -227,8 +288,24 @@ export class DatePicker {
         this._calendar = new Calendar(
             this.picker,
             (date) => {
-                // @@
-                return true
+                const {maxDate} = this._options
+                const {minDate} = this._options
+                const {dates} = this._options
+
+                // Check date is within any min/max range
+                if (minDate && date.getTime() < minDate) {
+                    return false
+                }
+
+                if (maxDate && date.getTime() > maxDate) {
+                    return false
+                }
+
+                // Apply `testDate` behaviour
+                const testDate = this.constructor
+                    .behaviours[this._behaviours.testDate]
+
+                return testDate(this, dates, date)
             },
             this._options.firstWeekday,
             this._options.monthNames,
@@ -237,7 +314,26 @@ export class DatePicker {
         this.calendar.init()
 
         // Set up event listeners
-        // @@
+        $.listen(
+            window,
+            {
+                'fullscreenchange': this._handlers.close,
+                'orientationchange': this._handlers.close,
+                'resize': this._handlers.close
+            }
+        )
+
+        $.listen(
+            this.input,
+            {
+                'blur': this._handlers.close,
+                'change': this._handlers.pick,
+                'click': this._handlers.open,
+                'focus': this._handlers.open
+            }
+        )
+
+        $.listen(this.calendar.calendar, {'picked': this._handlers.pick})
     }
 
     /**

@@ -132,10 +132,10 @@ export class Calendar {
      */
     destroy() {
         // Remove event handlers
-        $.ignore(this.calendar, {'mousedown': this._handlers['keepFocus']})
-        $.ignore(this._dom.next, {'click': this._handlers['next']})
-        $.ignore(this._dom.previous, {'click': this._handlers['previous']})
-        $.ignore(this._dom.dates, {'click': this._handlers['pick']})
+        $.ignore(this.calendar, {'mousedown': this._handlers.keepFocus})
+        $.ignore(this._dom.next, {'click': this._handlers.next})
+        $.ignore(this._dom.previous, {'click': this._handlers.previous})
+        $.ignore(this._dom.dates, {'click': this._handlers.pick})
 
         // Remove the calendar from the parent
         if (this.calendar) {
@@ -219,10 +219,10 @@ export class Calendar {
         }
 
         // Set up event listeners
-        $.listen(this.calendar, {'mousedown': this._handlers['keepFocus']})
-        $.listen(this._dom.next, {'click': this._handlers['next']})
-        $.listen(this._dom.previous, {'click': this._handlers['previous']})
-        $.listen(this._dom.dates, {'click': this._handlers['pick']})
+        $.listen(this.calendar, {'mousedown': this._handlers.keepFocus})
+        $.listen(this._dom.next, {'click': this._handlers.next})
+        $.listen(this._dom.previous, {'click': this._handlers.previous})
+        $.listen(this._dom.dates, {'click': this._handlers.pick})
 
         // Add the calendar to the parent element
         this.parent.appendChild(this.calendar)
