@@ -1,0 +1,104 @@
+.mh-calendar {
+  box-sizing: border-box;
+  float: left;
+  font-family: sans-serif;
+  padding: 10px;
+  user-select: none;
+  width: 300px; }
+  .mh-calendar * {
+    box-sizing: border-box; }
+  .mh-calendar__nav {
+    position: relative; }
+  .mh-calendar__month-year {
+    color: #666;
+    font-size: 18px;
+    text-align: center; }
+  .mh-calendar__next, .mh-calendar__previous {
+    border-bottom: 8px solid transparent;
+    border-radius: 3px;
+    border-top: 8px solid transparent;
+    cursor: pointer;
+    height: 0;
+    position: absolute;
+    top: 2px;
+    width: 0; }
+  .mh-calendar__next {
+    border-left: 12px solid #334144;
+    right: 10px; }
+  .mh-calendar__previous {
+    border-right: 12px solid #334144;
+    left: 10px; }
+  .mh-calendar__weekdays {
+    margin-top: 10px; }
+    .mh-calendar__weekdays::after {
+      clear: both;
+      content: ' ';
+      display: table; }
+  .mh-calendar__weekday {
+    color: #999;
+    float: left;
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+    width: 40px; }
+  .mh-calendar__dates {
+    margin-top: 10px; }
+    .mh-calendar__dates::after {
+      clear: both;
+      content: ' ';
+      display: table; }
+  .mh-calendar__date {
+    color: #666;
+    float: left;
+    font-size: 14px;
+    height: 40px;
+    line-height: 40px;
+    position: relative;
+    text-align: center;
+    width: 40px; }
+    .mh-calendar__date:hover {
+      cursor: pointer; }
+      .mh-calendar__date:hover::after {
+        background: rgba(226, 106, 106, 0.1);
+        border-radius: 20px;
+        content: '';
+        display: block;
+        height: 40px;
+        left: 0;
+        position: absolute;
+        top: 0;
+        width: 40px;
+        z-index: -1; }
+    .mh-calendar__date--selected {
+      background: #e26a6a;
+      border-radius: 20px;
+      color: #fff;
+      font-weight: bold; }
+      .mh-calendar__date--selected:hover {
+        cursor: default; }
+        .mh-calendar__date--selected:hover::after {
+          display: none; }
+    .mh-calendar__date--today {
+      text-decoration: underline; }
+    .mh-calendar__date--blocked {
+      color: #999;
+      font-style: italic;
+      font-weight: normal; }
+      .mh-calendar__date--blocked:hover {
+        cursor: default; }
+        .mh-calendar__date--blocked:hover::after {
+          display: none; }
+    .mh-calendar__date--selected.mh-calendar__date--blocked {
+      color: #fff; }
+
+.mh-date-picker {
+  background: #fff;
+  border: 1px solid #d4dce0;
+  border-radius: 3px;
+  display: none;
+  margin-top: 10px;
+  position: absolute;
+  width: 300px;
+  z-index: 4; }
+  .mh-date-picker--open {
+    display: block; }

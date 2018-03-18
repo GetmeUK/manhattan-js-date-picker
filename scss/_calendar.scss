@@ -1,0 +1,139 @@
+
+.mh-calendar {
+    box-sizing: border-box;
+    float: left;
+    font-family: sans-serif;
+    padding: 10px;
+    user-select: none;
+    width: 300px;
+
+    * {
+        box-sizing: border-box;
+    }
+
+    &__nav {
+        position: relative;
+    }
+
+    &__month-year {
+        color: #666;
+        font-size: 18px;
+        text-align: center;
+    }
+
+    &__next,
+    &__previous {
+        border-bottom: 8px solid transparent;
+        border-radius: 3px;
+        border-top: 8px solid transparent;
+        cursor: pointer;
+        height: 0;
+        position: absolute;
+        top: 2px;
+        width: 0;
+    }
+
+    &__next {
+        border-left: 12px solid #334144;
+        right: 10px;
+    }
+
+    &__previous {
+        border-right: 12px solid #334144;
+        left: 10px;
+    }
+
+    &__weekdays {
+        margin-top: 10px;
+
+        &::after {
+            clear: both;
+            content: ' ';
+            display: table;
+        }
+    }
+
+    &__weekday {
+        color: #999;
+        float: left;
+        font-size: 11px;
+        font-weight: bold;
+        text-align: center;
+        width: 40px;
+    }
+
+    &__dates {
+        margin-top: 10px;
+
+        &::after {
+            clear: both;
+            content: ' ';
+            display: table;
+        }
+    }
+
+    &__date {
+        color: #666;
+        float: left;
+        font-size: 14px;
+        height: 40px;
+        line-height: 40px;
+        position: relative;
+        text-align: center;
+        width: 40px;
+
+        &:hover {
+            cursor: pointer;
+
+            &::after {
+                background: rgba(226, 106, 106, 0.1);
+                border-radius: 20px;
+                content: '';
+                display: block;
+                height: 40px;
+                left: 0;
+                position: absolute;
+                top: 0;
+                width: 40px;
+                z-index: -1;
+            }
+        }
+
+        &--selected {
+            background: #e26a6a;
+            border-radius: 20px;
+            color: #fff;
+            font-weight: bold;
+
+            &:hover {
+                cursor: default;
+
+                &::after {
+                    display: none;
+                }
+            }
+        }
+
+        &--today {
+            text-decoration: underline;
+        }
+
+        &--blocked {
+            color: #999;
+            font-style: italic;
+            font-weight: normal;
+
+            &:hover {
+                cursor: default;
+
+                &::after {
+                    display: none;
+                }
+            }
+        }
+
+        &--selected.mh-calendar__date--blocked {
+            color: #fff;
+        }
+    }
+}
