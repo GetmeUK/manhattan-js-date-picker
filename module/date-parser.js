@@ -55,10 +55,18 @@ export class DateParser {
     }
 
     /**
-     * Parse (and return) a string as a date using the named parser.
+     * Attempt to parse (and return) a string as a date using the list of
+     * named parsers.
      */
-    parse(parser, s) {
-        return this.constructor.parsers[parser](this, s)
+    parse(parsers, s) {
+        let date = null
+        for (let parser of parsers) {
+            date = this.constructor.parsers[parser](this, s)
+            if (date !== null) {
+                break
+            }
+        }
+        return date
     }
 }
 
