@@ -47,6 +47,31 @@ export class DateParser {
         this.shortMonthNames = shortMonthNames
     }
 
+    // -- Getters & Setters ---
+    get monthNames() {
+        return this._monthNames.slice()
+    }
+
+    set monthNames(names) {
+        this._monthNames = names.slice()
+        this._monthNamesLower = names.map((v) => {
+            return v.toLowerCase()
+        })
+    }
+
+    get shortMonthNames() {
+        return this._shortMonthNames.slice()
+    }
+
+    set shortMonthNames(names) {
+        this._shortMonthNames = names.slice()
+        this._shortMonthNamesLower = names.map((v) => {
+            return v.toLowerCase()
+        })
+    }
+
+    // -- Public methods --
+
     /**
      * Format (and return) a date as a string using the named formatter.
      */
@@ -214,15 +239,19 @@ DateParser.parsers = {
 
             // Attempt to find a month in the components
             month = null
+
+            const monthNamesLower = inst._monthNamesLower
+            const shortMonthNamesLower = inst._shortMonthNamesLower
+
             for (let [i, component] of components.entries()) {
 
                 // First check for a full month name...
-                if (inst.monthNames.indexOf(component)) {
-                    month = inst.monthNames.indexOf(component)
+                if (monthNamesLower.indexOf(component) !== -1) {
+                    month = monthNamesLower.indexOf(component)
 
                 // ...if not check for a short month name.
-                } else if (inst.shortMonthNames.indexOf(component)) {
-                    month = inst.shortMonthNames.indexOf(component)
+                } else if (shortMonthNamesLower.indexOf(component) !== -1) {
+                    month = shortMonthNamesLower.indexOf(component)
                 }
 
                 if (month !== null) {
@@ -262,7 +291,9 @@ DateParser.parsers = {
             }
 
             // If no year was found then default to the current year
-            year = (new Date()).getYear()
+            if (year === null) {
+                year = (new Date()).getFullYear()
+            }
 
             // If the year doesn't contain the century then we add the current
             // century to it.
