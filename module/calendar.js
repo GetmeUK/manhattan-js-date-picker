@@ -54,7 +54,7 @@ export class Calendar {
         this._handlers = {
 
             'keepFocus': (event) => {
-                event.prevenDefault()
+                event.preventDefault()
             },
 
             'next': (event) => {
@@ -62,24 +62,27 @@ export class Calendar {
             },
 
             'pick': (event) => {
-                const dateElm = event.currentTarget
+                const {css} = this.constructor
+                const dateElm = event.target
 
                 // Make sure the event was triggered against a date
-                if (dateElm === this._dom.dates) {
+                if (!dateElm.classList.contains(css['date'])) {
                     return
                 }
 
                 // Check the date isn't blocked
-                const blockedCSSClass = this.constructor.css['blocked']
-                if (dateElm.classList.contains(blockedCSSClass)) {
+                if (dateElm.classList.contains(css['blocked'])) {
                     return
                 }
+
+                // Update the date
+                this.date = dateElm._date
 
                 // Dispatch a picked event against the calendar
                 $.dispatch(
                     this.calendar,
                     'picked',
-                    {'date': dateElm._date}
+                    {'date': this.date}
                 )
             },
 
@@ -101,7 +104,7 @@ export class Calendar {
     }
 
     set date(date) {
-        this._date = new Date(this._date.valueOf())
+        this._date = new Date(date.valueOf())
         this._update()
     }
 
@@ -187,8 +190,8 @@ export class Calendar {
         navElm.appendChild(this._dom.previous)
 
         // ...weekdays components
-        const weekdays = $.create('div', {'class': css['weekdays']})
-        this.calendar.appendChild(weekdays)
+        const weekdaysElm = $.create('div', {'class': css['weekdays']})
+        this.calendar.appendChild(weekdaysElm)
 
         for (let i = this.firstWeekday; i < (this.firstWeekday + 7); i += 1) {
 
@@ -204,7 +207,7 @@ export class Calendar {
             weekdayElm.textContent = this.weekdayNames[weekday]
 
             // Add the week day element to the weekdays container
-            weekdays.appendChild(weekday)
+            weekdaysElm.appendChild(weekdayElm)
         }
 
         // ...dates components
@@ -229,7 +232,7 @@ export class Calendar {
         this.parent.appendChild(this.calendar)
 
         // Update the initial calendar view
-        this.view()
+        this._update()
     }
 
     /**
@@ -264,8 +267,9 @@ export class Calendar {
             year -= 1
 
         } else if (month > 11) {
-            month += 12
+            month -= 12
             year += 1
+
         }
 
         // Apply the offset
@@ -286,11 +290,11 @@ export class Calendar {
      */
     _update() {
         // Update the month and year label
-        this._dom.month.textContent
+        this._dom.monthYear.textContent
             = `${this.monthNames[this.month]}, ${this.year}`
 
         // Find the first date/day in the month
-        const date = new Date(this.year, this.month, 1).getDay()
+        const date = new Date(this.year, this.month, 1)
 
         // Determine the start date for the month given the first weekday
         // preference.
@@ -340,7 +344,7 @@ export class Calendar {
 
             // Selected date
             if (date.getTime() === this.date.getTime()) {
-                classList.add(css['today'])
+                classList.add(css['selected'])
             }
 
             // Move the date on by 1 day

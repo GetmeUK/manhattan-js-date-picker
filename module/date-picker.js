@@ -109,7 +109,7 @@ export class DatePicker {
 
         // Handle date based options
         let _toDate = (s) => {
-            return this.dateParser.parse(s, this._options.parsers)
+            return this.dateParser.parse(this._options.parsers, s)
         }
 
         if (typeof this._options.maxDate === 'string') {
@@ -170,8 +170,8 @@ export class DatePicker {
                 // When the input changes attempt to parse its value as a
                 // date, if successful then we pick that date.
                 const date = this.dateParser.parse(
-                    this.input.value,
-                    this._options.parsers
+                    this._options.parsers,
+                    this.input.value
                 )
                 if (date) {
                     this.pick(date)
@@ -195,23 +195,23 @@ export class DatePicker {
 
     // -- Getters & Setters --
 
-    calendar() {
+    get calendar() {
         return this._calendar
     }
 
-    dateParser() {
+    get dateParser() {
         return this._dateParser
     }
 
-    input() {
+    get input() {
         return this._dom.input
     }
 
-    isOpen() {
+    get isOpen() {
         return this._open
     }
 
-    picker() {
+    get picker() {
         return this._dom.picker
     }
 
@@ -229,7 +229,7 @@ export class DatePicker {
         this.picker.classList.remove(this.constructor.css['open'])
 
         // Flag the date picker as closed
-        this._isOpen = false
+        this._open = false
 
         // Dispatch closed event against the input
         $.dispatch(this.input, 'closed')
@@ -303,7 +303,8 @@ export class DatePicker {
 
                 // Apply `testDate` behaviour
                 const testDate = this.constructor
-                    .behaviours[this._behaviours.testDate]
+                    .behaviours
+                    .testDate[this._behaviours.testDate]
 
                 return testDate(this, dates, date)
             },
@@ -343,12 +344,12 @@ export class DatePicker {
         // Parse the input's value as a date, if the value is a valid date
         // then select it in the calendar.
         const date = this.dateParser.parse(
-            this.input.value,
-            this._options.parsers
+            this._options.parsers,
+            this.input.value
         )
         if (date !== null) {
             this.calendar.goto(date.getMonth(), date.getFullYear())
-            this.calendar.select(date)
+            this.calendar.date = date
         }
 
         // Update the position of the picker inline with the associated input
@@ -358,7 +359,7 @@ export class DatePicker {
         this.picker.classList.add(this.constructor.css['open'])
 
         // Flag the date picker as open
-        this._isOpen = open
+        this._open = true
 
         // Dispatch opened event against the input
         $.dispatch(this.input, 'opened')
@@ -369,7 +370,7 @@ export class DatePicker {
         this.calendar.date = date
 
         // Update the input value with the date
-        this.constructor.behaviours[this._behaviours.input](this, date)
+        this.constructor.behaviours.input[this._behaviours.input](this, date)
 
         // Dispatch a picked event against the input
         $.dispatch(this.input, 'picked', {date})

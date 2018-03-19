@@ -214,7 +214,7 @@ DateParser.parsers = {
 
             // Attempt to find a month in the components
             month = null
-            for (let [i, component] of components.slice()) {
+            for (let [i, component] of components.entries()) {
 
                 // First check for a full month name...
                 if (inst.monthNames.indexOf(component)) {
@@ -241,7 +241,7 @@ DateParser.parsers = {
             year = null
 
             // First check for a 4 digit year...
-            for (let [i, component] of components.slice()) {
+            for (let [i, component] of components.entries()) {
                 if (component.length === 4) {
                     year = Number(component)
                     components.splice(i, 1)
