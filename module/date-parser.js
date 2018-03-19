@@ -233,7 +233,7 @@ DateParser.parsers = {
         // the month and year to the current month/year until we determine the
         // number of components.
         let month = (new Date()).getMonth()
-        let year = (new Date()).getYear()
+        let year = (new Date()).getFullYear()
 
         if (components.length > 1) {
 
@@ -337,9 +337,9 @@ DateParser.parsers = {
         }
 
         // Convert the date information to a numbers
-        const year = Number(match[5])
-        const month = Number(match[3]) - 1
-        const day = Number(match[1])
+        const year = Number(match[1])
+        const month = Number(match[2]) - 1
+        const day = Number(match[3])
 
         // Convert the components to a native date
         const date = new Date(year, month, day)

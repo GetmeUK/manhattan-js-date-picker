@@ -119,6 +119,17 @@ describe('DateParser', () => {
                 date.getDate().should.equal(19)
 
             })
+
+            it('should return null if none of the named parsers can provide '
+                + 'a valid date', () => {
+
+                const date = parser.parse(
+                    ['human', 'dmy', 'iso'],
+                    '19 Foo 2018'
+                )
+                chai.expect(date).to.be.null
+
+            })
         })
 
     })
@@ -147,6 +158,16 @@ describe('DateParser', () => {
             })
         })
 
+        describe('humanShort', () => {
+            it('should format the date as ``{day} {short month name} '
+                + '{full year}`', () => {
+
+                formatters.humanShort(parser, date)
+                    .should
+                    .equal('19 Mar 2018')
+            })
+        })
+
         describe('iso', () => {
             it('should format the date as `yyyy-mm-dd`', () => {
                 formatters.iso(parser, date).should.equal('2018-03-19')
@@ -160,7 +181,7 @@ describe('DateParser', () => {
         })
     })
 
-    describe('formatters', () => {
+    describe('parsers', () => {
         let date = null
         let parser = null
         const {parsers} = DateParser
@@ -189,6 +210,22 @@ describe('DateParser', () => {
                     .should
                     .equal(date.getTime())
 
+                parsers.dmy(parser, '19.03.18')
+                    .getTime()
+                    .should
+                    .equal(date.getTime())
+            })
+
+            it('should return null if a string does\'t match the format '
+                + '`d/m/y`', () => {
+
+                chai.expect(parsers.dmy(parser, '19*03*2018')).to.be.null
+            })
+
+            it('should return null if the string represents an invalid '
+                + '`date`', () => {
+
+                chai.expect(parsers.dmy(parser, '32/03/2018')).to.be.null
             })
         })
 
@@ -211,13 +248,90 @@ describe('DateParser', () => {
                     .should
                     .equal(date.getTime())
 
+                const today = new Date()
+                let current = parsers.human(parser, '19 Mar')
+                current.getFullYear().should.equal(today.getFullYear())
+
+                current = parsers.human(parser, '19')
+                current.getFullYear().should.equal(today.getFullYear())
+                current.getMonth().should.equal(today.getMonth())
+            })
+
+            it('should return null if a string does\'t match a human '
+                + 'readable format', () => {
+
+                chai.expect(parsers.human(parser, '19 Mar 20 18')).to.be.null
+                chai.expect(parsers.human(parser, '19 Foo 2018')).to.be.null
+                chai.expect(parsers.human(parser, '19 Mar 2a18')).to.be.null
+                chai.expect(parsers.human(parser, '1a Mar 18')).to.be.null
+            })
+
+            it('should return null if the string represents an invalid '
+                + '`date`', () => {
+
+                chai.expect(parsers.human(parser, '32 Mar 18')).to.be.null
             })
         })
 
+        describe('iso', () => {
+            it('should parse a date from a string using the '
+                + 'format', () => {
+
+                parsers.iso(parser, '2018-03-19')
+                    .getTime()
+                    .should
+                    .equal(date.getTime())
+            })
+
+            it('should return null if a string does\'t match the ISO 8601 '
+                + 'format', () => {
+
+                chai.expect(parsers.iso(parser, '2018*03*19')).to.be.null
+            })
+
+            it('should return null if the string represents an invalid '
+                + '`date`', () => {
+
+                chai.expect(parsers.iso(parser, '2018-03-32')).to.be.null
+            })
+        })
+
+        describe('mdy', () => {
+            it('should parse a date from a string using the format '
+                + '`m/d/y`', () => {
+
+                parsers.mdy(parser, '03/19/2018')
+                    .getTime()
+                    .should
+                    .equal(date.getTime())
+
+                parsers.mdy(parser, '03-19-2018')
+                    .getTime()
+                    .should
+                    .equal(date.getTime())
+
+                parsers.mdy(parser, '03.19.2018')
+                    .getTime()
+                    .should
+                    .equal(date.getTime())
+
+                parsers.mdy(parser, '03.19.18')
+                    .getTime()
+                    .should
+                    .equal(date.getTime())
+            })
+
+            it('should return null if a string does\'t match the format '
+                + '`m/d/y`', () => {
+
+                chai.expect(parsers.mdy(parser, '03*19*2018')).to.be.null
+            })
+
+            it('should return null if the string represents an invalid '
+                + '`date`', () => {
+
+                chai.expect(parsers.mdy(parser, '03/32/2018')).to.be.null
+            })
+        })
     })
-
-    // @@ Parsers
-    // - iso
-    // - mdy
-
 })
