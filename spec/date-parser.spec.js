@@ -7,6 +7,7 @@ import {DateParser} from '../module/date-parser.js'
 chai.should()
 chai.use(require('sinon-chai'))
 
+
 describe('DateParser', () => {
 
     describe('constructor', () => {
@@ -102,7 +103,6 @@ describe('DateParser', () => {
                 const date = new Date(2018, 2, 19)
                 const s = parser.format('human', date)
                 s.should.equal('19 March 2018')
-
             })
         })
 
@@ -117,7 +117,6 @@ describe('DateParser', () => {
                 date.getFullYear().should.equal(2018)
                 date.getMonth().should.equal(2)
                 date.getDate().should.equal(19)
-
             })
 
             it('should return null if none of the named parsers can provide '
@@ -128,7 +127,6 @@ describe('DateParser', () => {
                     '19 Foo 2018'
                 )
                 chai.expect(date).to.be.null
-
             })
         })
 
