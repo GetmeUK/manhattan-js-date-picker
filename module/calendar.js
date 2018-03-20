@@ -31,6 +31,7 @@ export class Calendar {
 
         // Initially the calendar selects and displays today's date
         const today = new Date()
+        today.setHours(0, 0, 0, 0)
 
         // Allocate attributes for the date selection and view
         this._month = today.getMonth()
@@ -134,14 +135,14 @@ export class Calendar {
      * Remove the calendar.
      */
     destroy() {
-        // Remove event handlers
-        $.ignore(this.calendar, {'mousedown': this._handlers.keepFocus})
-        $.ignore(this._dom.next, {'click': this._handlers.next})
-        $.ignore(this._dom.previous, {'click': this._handlers.previous})
-        $.ignore(this._dom.dates, {'click': this._handlers.pick})
-
-        // Remove the calendar from the parent
         if (this.calendar) {
+            // Remove event handlers
+            $.ignore(this.calendar, {'mousedown': this._handlers.keepFocus})
+            $.ignore(this._dom.next, {'click': this._handlers.next})
+            $.ignore(this._dom.previous, {'click': this._handlers.previous})
+            $.ignore(this._dom.dates, {'click': this._handlers.pick})
+
+            // Remove the calendar from the parent
             this.parent.removeChild(this.calendar)
         }
 
