@@ -53,6 +53,7 @@ describe.only('Calendar', () => {
         })
 
         describe('date', () => {
+
             it('should return the currently selected date within the '
                 + ' calendar', () => {
 
@@ -60,32 +61,104 @@ describe.only('Calendar', () => {
                 today.setHours(0, 0, 0, 0)
                 calendar.date.getTime().should.equal(today.getTime())
             })
+
             it('should set the selected date within the calendar', () => {
-
-                const date = new Date(2018, 3, 19)
+                const date = new Date(2010, 2, 19)
                 calendar.date = date
-
                 calendar.date.getTime().should.equal(date.getTime())
+            })
 
-                // View the month in question and check the relevant date
-                // element is flagged as selected.
-                // @@
+        })
+
+        describe('month', () => {
+
+            it('should return the month the calendar is displaying', () => {
+                calendar.goto(2, 2010)
+                calendar.month.should.equal(2)
+            })
+
+            it('should set the month the calendar is displaying', () => {
+                const year = calendar.year
+                calendar.month = 2
+                calendar.month.should.equal(2)
+                calendar.year.should.equal(year)
+            })
+
+        })
+
+        describe('calendar', () => {
+            it('should return the parent element for the calendar', () => {
+                calendar.parent.should.equal(pickerElm)
             })
         })
 
-        // describe('month', () => {
+        describe('year', () => {
 
-        // })
+            it('should return the year the calendar is displaying', () => {
+                calendar.goto(2, 2010)
+                calendar.year.should.equal(2010)
+            })
+
+            it('should set the year the calendar is displaying', () => {
+                const month = calendar.month
+                calendar.year = 2010
+                calendar.month.should.equal(month)
+                calendar.year.should.equal(2010)
+            })
+
+        })
+
     })
 
-    // @@ Getters & Setters
-    // - month (get/set)
-    // - parent
-    // - year (get/set)
+    describe('public methods', () => {
+        let calendar = null
+
+        beforeEach(() => {
+            calendar = new Calendar(pickerElm)
+            calendar.init()
+        })
+
+        afterEach(() => {
+            calendar.destroy()
+        })
+
+        describe('destroy', () => {
+
+            // @@ START HERE
+
+        })
+
+        describe('goto', () => {
+
+            beforeEach(() => {
+                sinon.spy(calendar, '_update')
+            })
+
+            afterEach(() => {
+                calendar._update.restore()
+            })
+
+            it('should set the month/year displayed in the calendar', () => {
+
+                calendar.goto(2, 2010)
+                calendar.month.should.equal(2)
+                calendar.year.should.equal(2010)
+                calendar._update.should.have.been.calledOnce
+
+                // Make sure that setting the calendar to the current month
+                // and year doesn't trigger an update.
+                calendar.goto(2, 2010)
+                calendar.month.should.equal(2)
+                calendar.year.should.equal(2010)
+                calendar._update.should.have.been.calledOnce
+
+            })
+        })
+
+    })
 
     // @@ Public methods
     // - destroy
-    // - goto
     // - init
     // - next
     // - offset
