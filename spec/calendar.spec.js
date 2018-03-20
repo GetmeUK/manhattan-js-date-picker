@@ -139,7 +139,6 @@ describe.only('Calendar', () => {
             })
 
             it('should set the month/year displayed in the calendar', () => {
-
                 calendar.goto(2, 2010)
                 calendar.month.should.equal(2)
                 calendar.year.should.equal(2010)
@@ -151,10 +150,8 @@ describe.only('Calendar', () => {
                 calendar.month.should.equal(2)
                 calendar.year.should.equal(2010)
                 calendar._update.should.have.been.calledOnce
-
             })
         })
-
     })
 
     // @@ Public methods
