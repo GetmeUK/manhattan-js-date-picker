@@ -144,6 +144,7 @@ export class Calendar {
 
             // Remove the calendar from the parent
             this.parent.removeChild(this.calendar)
+            this._dom.calendar = null
         }
 
         // Remove the sortable reference from the container

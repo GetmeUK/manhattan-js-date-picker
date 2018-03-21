@@ -124,8 +124,15 @@ describe.only('Calendar', () => {
 
         describe('destroy', () => {
 
-            // @@ START HERE
+            afterEach(() => {
+                calendar.init()
+            })
 
+            it('should destroy the Calendar', () => {
+                calendar.destroy()
+                chai.expect(calendar.calendar).to.be.null
+                chai.expect(pickerElm._mhCalendar).to.be.undefined
+            })
         })
 
         describe('goto', () => {
@@ -152,14 +159,110 @@ describe.only('Calendar', () => {
                 calendar._update.should.have.been.calledOnce
             })
         })
+
+        describe('init', () => {
+
+            beforeEach(() => {
+                calendar.destroy()
+
+                sinon.spy(calendar._handlers, 'keepFocus')
+                sinon.spy(calendar._handlers, 'next')
+                sinon.spy(calendar._handlers, 'pick')
+                sinon.spy(calendar._handlers, 'previous')
+            })
+
+            afterEach(() => {
+                calendar._handlers.keepFocus.restore()
+                calendar._handlers.next.restore()
+                calendar._handlers.pick.restore()
+                calendar._handlers.previous.restore()
+            })
+
+            it('should add a reference for the calendar to the parent', () => {
+                calendar.init()
+                pickerElm._mhCalendar.should.equal(calendar)
+            })
+
+            it('should create a calendar UI component', () => {
+                const css = Calendar.css
+
+                calendar.init()
+
+                $.many(`.${css['calendar']}`, pickerElm).length
+                    .should
+                    .equal(1)
+
+                $.many(`.${css['monthYear']}`, pickerElm).length
+                    .should
+                    .equal(1)
+
+                $.many(`.${css['weekday']}`, pickerElm).length
+                    .should
+                    .equal(7)
+
+                $.many(`.${css['date']}`, pickerElm).length
+                    .should
+                    .equal(42)
+
+            })
+
+            it('should set up event handlers for the calendar', () => {
+                calendar.init()
+
+                // Keep focus
+                $.dispatch(calendar.calendar, 'mousedown')
+                calendar._handlers.keepFocus.should.have.been.called
+
+                // Next
+                $.dispatch(calendar._dom.next, 'click')
+                calendar._handlers.next.should.have.been.called
+
+                // Pick
+                $.dispatch(calendar._dom.dates, 'click')
+                calendar._handlers.pick.should.have.been.called
+
+                // Previous
+                $.dispatch(calendar._dom.previous, 'click')
+                calendar._handlers.previous.should.have.been.called
+            })
+        })
+
+        describe('next', () => {
+
+            it('should change the calendar view to the next month', () => {
+                calendar.goto(6, 2010)
+                calendar.next()
+                calendar.month.should.equal(7)
+                calendar.year.should.equal(2010)
+            })
+
+        })
+
+        describe('offset', () => {
+
+            it('should move the calendar view by the given offset months and '
+                + 'years', () => {
+
+                // @@
+
+            })
+
+        })
+
+        describe('previous', () => {
+
+            it('should change the calendar view to the next month', () => {
+                calendar.goto(6, 2010)
+                calendar.previous()
+                calendar.month.should.equal(5)
+                calendar.year.should.equal(2010)
+            })
+
+        })
     })
 
     // @@ Public methods
-    // - destroy
-    // - init
-    // - next
     // - offset
-    // - previous
 
     // @@ Private methods
     // - _update
