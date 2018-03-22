@@ -251,7 +251,7 @@ export class Calendar {
     offset(months, years=0) {
 
         // Cater for offsets of more than 12 months
-        let offsetYears = 0
+        let offsetYears = years
         if (months > 0) {
             offsetYears += Math.floor(Math.abs(months) / 12)
         } else {

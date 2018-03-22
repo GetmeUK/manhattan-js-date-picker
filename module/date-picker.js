@@ -24,12 +24,6 @@ export class DatePicker {
             {
 
                 /**
-                 * Flag indicating if the date picker should close when a date
-                 * is picked.
-                 */
-                'closeOnPick': false,
-
-                /**
                  * Used to configure the `testDate` behaviour, for example if
                  * used with the `testDate.excluding` behaviour then `dates`
                  * should be a list of dates that cannot be picked.
@@ -74,6 +68,12 @@ export class DatePicker {
                  * A list of abbreviated month names used by the date picker.
                  */
                 'shortMonthNames': DEFAULT_SHORT_MONTH_NAMES,
+
+                /**
+                 * Flag indicating if the date picker should stay open when a
+                 * date is picked.
+                 */
+                'stayOpenOnPick': false,
 
                 /**
                  * A list of weekday names used by the date picker.
