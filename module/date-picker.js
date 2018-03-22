@@ -58,6 +58,13 @@ export class DatePicker {
                 'monthNames': DEFAULT_MONTH_NAMES,
 
                 /**
+                 * Flag indicating if the date picker should display the popup
+                 * when the input field is in focus (by default the popup is
+                 * displayed).
+                 */
+                'noPopup': false,
+
+                /**
                  * A list of parsers that will be used to attempt to parse
                  * an input string as a date (strings are parsed using each
                  * parser in turn and in the order given).
@@ -96,14 +103,14 @@ export class DatePicker {
         if (typeof this._options.monthNames === 'string') {
             this._options.monthNames = _toArray(this._options.monthNames)
         }
-        if (typeof this._options.shortMonthNames === 'string') {
+        if (typeof this._options.parsers === 'string') {
             this._options.parsers = _toArray(this._options.parsers)
         }
         if (typeof this._options.shortMonthNames === 'string') {
             this._options.shortMonthNames
                 = _toArray(this._options.shortMonthNames)
         }
-        if (typeof this._options.shortMonthNames === 'string') {
+        if (typeof this._options.weekdayNames === 'string') {
             this._options.weekdayNames = _toArray(this._options.weekdayNames)
         }
 
@@ -179,7 +186,9 @@ export class DatePicker {
             },
 
             'open': () => {
-                this.open()
+                if (!this._options.noPopup) {
+                    this.open()
+                }
             },
 
             'pick': (event) => {

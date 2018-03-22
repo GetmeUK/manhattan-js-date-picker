@@ -452,7 +452,7 @@ describe('Calendar', () => {
             it('should call prevent default against the event to prevent '
                 + 'loss if focus', () => {
 
-                const event = {'preventDefault':  sinon.spy()}
+                const event = {'preventDefault': sinon.spy()}
                 $.dispatch(calendar.calendar, 'mousedown', event)
                 event.preventDefault.should.have.been.called
 
@@ -483,7 +483,8 @@ describe('Calendar', () => {
             it('should select the picked date', () => {
 
                 calendar.goto(6, 2010)
-                const dateElm = calendar._dom.dates.childNodes[10]
+                const dateIndex = 10
+                const dateElm = calendar._dom.dates.childNodes[dateIndex]
                 $.dispatch(dateElm, 'click')
                 calendar.date.getTime().should.equal(dateElm._date.getTime())
                 onPicked.should.have.been.called
@@ -493,8 +494,8 @@ describe('Calendar', () => {
             it('should do nothing if the date picked is blocked', () => {
 
                 calendar.goto(6, 2010)
-                const date = calendar.date
-                const dateElm = calendar._dom.dates.childNodes[0]
+                const {date} = calendar
+                const [dateElm] = calendar._dom.dates.childNodes
                 $.dispatch(dateElm, 'click')
                 calendar.date.getTime().should.equal(date.getTime())
                 onPicked.should.not.have.been.called
@@ -504,15 +505,14 @@ describe('Calendar', () => {
 
         describe('previous', () => {
 
-            it('should change the calendar view to the previous ' +
-                'month', () => {
+            it('should change the calendar view to the previous '
+                + 'month', () => {
 
-            it('should change the calendar view to the next month', () => {
                 calendar.goto(6, 2010)
                 $.dispatch(calendar._dom.previous, 'click')
                 calendar.month.should.equal(5)
                 calendar.year.should.equal(2010)
-            })
+
             })
 
         })
