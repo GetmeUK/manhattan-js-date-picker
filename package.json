@@ -1,7 +1,7 @@
 {
   "name": "manhattan-date-picker",
   "version": "1.0.0",
-  "description": "Date parsing and picking for form fields. ",
+  "description": "Date parsing and picking for form fields.",
   "engines": {
     "node": ">=8.9.4"
   },
