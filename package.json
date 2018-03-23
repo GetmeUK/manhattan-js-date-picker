@@ -41,7 +41,8 @@
   },
   "keywords": [
     "manhattan",
-    "sorting"
+    "date parser",
+    "date picker"
   ],
   "author": "Anthony Blackshaw",
   "license": "MIT",
