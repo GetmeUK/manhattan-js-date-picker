@@ -24,10 +24,10 @@ export class Calendar {
     ) {
 
         // Set the calendar options
-        this.dateTest = dateTest
-        this.firstWeekday = firstWeekday
-        this.monthNames = monthNames
-        this.weekdayNames = weekdayNames
+        this._dateTest = dateTest
+        this._firstWeekday = firstWeekday
+        this._monthNames = monthNames
+        this._weekdayNames = weekdayNames
 
         // Initially the calendar selects and displays today's date
         const today = new Date()
@@ -147,7 +147,7 @@ export class Calendar {
             this._dom.calendar = null
         }
 
-        // Remove the sortable reference from the container
+        // Remove the calendar reference from the parent
         delete this._dom.parent._mhCalendar
     }
 
@@ -195,7 +195,11 @@ export class Calendar {
         const weekdaysElm = $.create('div', {'class': css['weekdays']})
         this.calendar.appendChild(weekdaysElm)
 
-        for (let i = this.firstWeekday; i < (this.firstWeekday + 7); i += 1) {
+        for (
+            let i = this._firstWeekday;
+            i < (this._firstWeekday + 7);
+            i += 1
+        ) {
 
             // Create the weekday element
             const weekdayElm = $.create('div', {'class': css['weekday']})
@@ -206,7 +210,7 @@ export class Calendar {
             if (i >= 7) {
                 weekday -= 7
             }
-            weekdayElm.textContent = this.weekdayNames[weekday]
+            weekdayElm.textContent = this._weekdayNames[weekday]
 
             // Add the week day element to the weekdays container
             weekdaysElm.appendChild(weekdayElm)
@@ -293,14 +297,14 @@ export class Calendar {
     _update() {
         // Update the month and year label
         this._dom.monthYear.textContent
-            = `${this.monthNames[this.month]}, ${this.year}`
+            = `${this._monthNames[this.month]}, ${this.year}`
 
         // Find the first date/day in the month
         const date = new Date(this.year, this.month, 1)
 
         // Determine the start date for the month given the first weekday
         // preference.
-        let daysOffset = date.getDay() - this.firstWeekday
+        let daysOffset = date.getDay() - this._firstWeekday
         if (daysOffset < 0) {
             daysOffset = 7 - Math.abs(daysOffset)
         }
@@ -335,7 +339,7 @@ export class Calendar {
             }
 
             // Blocked by the dates test (blocked)
-            if (this.dateTest && !this.dateTest(date)) {
+            if (this._dateTest && !this._dateTest(date)) {
                 classList.add(css['blocked'])
             }
 

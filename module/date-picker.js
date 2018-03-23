@@ -24,8 +24,8 @@ export class DatePicker {
             {
 
                 /**
-                 * Used to configure the `testDate` behaviour, for example if
-                 * used with the `testDate.excluding` behaviour then `dates`
+                 * Used to configure the `dateTest` behaviour, for example if
+                 * used with the `dateTest.excluding` behaviour then `dates`
                  * should be a list of dates that cannot be picked.
                  */
                 'dates': null,
@@ -114,9 +114,16 @@ export class DatePicker {
             this._options.weekdayNames = _toArray(this._options.weekdayNames)
         }
 
+        // Set up date parser (the parser must be initialized before we can
+        // parse options that contain dates).
+        this._dateParser = new DateParser(
+            this._options.monthNames,
+            this._options.shortMonthNames
+        )
+
         // Handle date based options
         let _toDate = (s) => {
-            return this.dateParser.parse(this._options.parsers, s)
+            return this._dateParser.parse(this._options.parsers, s)
         }
 
         if (typeof this._options.maxDate === 'string') {
@@ -140,16 +147,13 @@ export class DatePicker {
         $.config(
             this._behaviours,
             {
-                'input': 'setValue',
-                'testDate': 'any'
+                'dateTest': 'any',
+                'input': 'setValue'
             },
             options,
             input,
             prefix
         )
-
-        // A handle to the date parser
-        this._dateParser = null
 
         // A handle to the calendar component
         this._calendar = null
@@ -180,7 +184,7 @@ export class DatePicker {
                     this._options.parsers,
                     this.input.value
                 )
-                if (date) {
+                if (date !== null) {
                     this.pick(date)
                 }
             },
@@ -191,12 +195,8 @@ export class DatePicker {
                 }
             },
 
-            'pick': (event) => {
-                // Ignore the event if it was triggered by the date picker
-                // itself (prevents infinite cycle).
-                if (event._datePicker !== this) {
-                    this.pick(event.date)
-                }
+            'picked': (event) => {
+                this.pick(event.date)
             }
 
         }
@@ -259,27 +259,34 @@ export class DatePicker {
             this.input,
             {
                 'blur': this._handlers.close,
-                'change': this._handlers.pick,
+                'change': this._handlers.input,
                 'click': this._handlers.open,
                 'focus': this._handlers.open
             }
         )
 
-        $.ignore(this.calendar.calendar, {'picked': this._handlers.pick})
-
-        // Remove the date parser
-        this._dateParser = null
-
         // Destroy the calendar
-        this.calendar.destroy()
-        this._calendar = null
+        if (this.calendar !== null) {
+            $.ignore(this.calendar.calendar, {'picked': this._handlers.pick})
+
+            this.calendar.destroy()
+            this._calendar = null
+        }
 
         // Remove the date picker element
-        document.body.removeChild(this._dom.picker)
-        this._dom.picker = null
+        if (this._dom.picker !== null) {
+            document.body.removeChild(this._dom.picker)
+            this._dom.picker = null
+        }
+
+        // Remove the date picker reference from the input
+        delete this._dom.input._mhDatePicker
     }
 
     init() {
+        // Store a reference to the date picker instance against the input
+        this._dom.input._mhDatePicker = this
+
         // Create the date picker element
         this._dom.picker = $.create(
             'div',
@@ -287,35 +294,28 @@ export class DatePicker {
         )
         document.body.appendChild(this._dom.picker)
 
-        // Set up date parser
-        this._dateParser = new DateParser(
-            this._options.monthNames,
-            this._options.shortMonthNames
-        )
-
         // Set up calendar
         this._calendar = new Calendar(
             this.picker,
             (date) => {
                 const {maxDate} = this._options
                 const {minDate} = this._options
-                const {dates} = this._options
 
                 // Check date is within any min/max range
-                if (minDate && date.getTime() < minDate) {
+                if (minDate && date.getTime() < minDate.getTime()) {
                     return false
                 }
 
-                if (maxDate && date.getTime() > maxDate) {
+                if (maxDate && date.getTime() > maxDate.getTime()) {
                     return false
                 }
 
-                // Apply `testDate` behaviour
-                const testDate = this.constructor
+                // Apply `dateTest` behaviour
+                const dateTest = this.constructor
                     .behaviours
-                    .testDate[this._behaviours.testDate]
+                    .dateTest[this._behaviours.dateTest]
 
-                return testDate(this, dates, date)
+                return dateTest(this, date)
             },
             this._options.firstWeekday,
             this._options.monthNames,
@@ -337,19 +337,23 @@ export class DatePicker {
             this.input,
             {
                 'blur': this._handlers.close,
-                'change': this._handlers.pick,
+                'change': this._handlers.input,
                 'click': this._handlers.open,
                 'focus': this._handlers.open
             }
         )
 
-        $.listen(this.calendar.calendar, {'picked': this._handlers.pick})
+        $.listen(this.calendar.calendar, {'picked': this._handlers.picked})
     }
 
     /**
      * Open the date picker.
      */
     open() {
+        if (this.isOpen) {
+            return
+        }
+
         // Parse the input's value as a date, if the value is a valid date
         // then select it in the calendar.
         const date = this.dateParser.parse(
@@ -382,10 +386,10 @@ export class DatePicker {
         this.constructor.behaviours.input[this._behaviours.input](this, date)
 
         // Dispatch a picked event against the input
-        $.dispatch(this.input, 'picked', {date})
+        $.dispatch(this.input, 'picked', {'date': new Date(date.valueOf())})
 
         // Close the date picker if configured to
-        if (this._options.closeOnPick) {
+        if (!this._options.stayOpenOnPick) {
             this.close()
         }
     }
@@ -410,35 +414,10 @@ export class DatePicker {
 DatePicker.behaviours = {
 
     /**
-     * The `input` behaviour is used to set the value of the associated input
-     * for the date picker when a date is picked.
-     */
-    'input': {
-
-        /**
-         * Set the value of the input to the formatted date.
-         */
-        'setValue': (inst, date) => {
-
-            // Set the input value to the new date
-            inst.input.value = inst.dateParser.format(
-                inst._options.format,
-                date
-            )
-
-            // Dispatch a change event against the input, but flag that the
-            // event was triggered by the date picker so we don't trigger an
-            // infinite cycle.
-            $.dispatch(inst.input, 'change', {'_datePicker': inst})
-        }
-
-    },
-
-    /**
-     * The `testDate` behaviour is used to determine which dates can be
+     * The `dateTest` behaviour is used to determine which dates can be
      * selected using the date picker.
      */
-    'testDate': {
+    'dateTest': {
 
         /**
          * Allow any date to be picked.
@@ -451,8 +430,8 @@ DatePicker.behaviours = {
          * Allow all dates to be picked excluding those in the list of given
          * dates.
          */
-        'excluding': (inst, dates, date) => {
-            for (let otherDate of dates) {
+        'excluding': (inst, date) => {
+            for (let otherDate of inst._options.dates) {
                 if (date.getTime() === otherDate.getTime()) {
                     return false
                 }
@@ -463,24 +442,44 @@ DatePicker.behaviours = {
         /**
          * Allow only dates in the given list to be picked.
          */
-        'only': (inst, dates, date) => {
-            for (let otherDate of dates) {
+        'only': (inst, date) => {
+            for (let otherDate of inst._options.dates) {
                 if (date.getTime() === otherDate.getTime()) {
                     return true
                 }
             }
             return false
-        },
+        }
+
+    },
+
+    /**
+     * The `input` behaviour is used to set the value of the associated input
+     * for the date picker when a date is picked.
+     */
+    'input': {
 
         /**
-         * Allow only the given weekdays to be picked.
+         * Set the value of the input to the formatted date.
          */
-        'weekdays': (inst, weekdays, date) => {
-            return weekdays.indexOf(date.getDay()) > -1
+        'setValue': (inst, date) => {
+
+            // Set the input value to the new date
+            const orginalValue = inst.input.value
+            inst.input.value = inst.dateParser.format(
+                inst._options.format,
+                date
+            )
+
+            // Dispatch a change event against the input, but flag that the
+            // event was triggered by the date picker so we don't trigger an
+            // infinite cycle.
+            if (inst.input.value !== orginalValue) {
+                $.dispatch(inst.input, 'change')
+            }
         }
 
     }
-
 }
 
 

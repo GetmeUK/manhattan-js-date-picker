@@ -86,7 +86,7 @@ describe('Calendar', () => {
 
         })
 
-        describe('calendar', () => {
+        describe('parent', () => {
             it('should return the parent element for the calendar', () => {
                 calendar.parent.should.equal(pickerElm)
             })
@@ -128,13 +128,13 @@ describe('Calendar', () => {
                 calendar.init()
             })
 
-            it('should destroy the Calendar', () => {
+            it('should destroy the calendar', () => {
                 calendar.destroy()
                 chai.expect(calendar.calendar).to.be.null
                 chai.expect(pickerElm._mhCalendar).to.be.undefined
             })
 
-            it('should allow the Calendar to be destoryed even if it\'s not '
+            it('should allow the calendar to be destroyed even if it has not '
                 + 'been initialized', () => {
                 calendar.destroy()
                 calendar.destroy()
@@ -177,13 +177,6 @@ describe('Calendar', () => {
                 sinon.spy(calendar._handlers, 'next')
                 sinon.spy(calendar._handlers, 'pick')
                 sinon.spy(calendar._handlers, 'previous')
-            })
-
-            afterEach(() => {
-                calendar._handlers.keepFocus.restore()
-                calendar._handlers.next.restore()
-                calendar._handlers.pick.restore()
-                calendar._handlers.previous.restore()
             })
 
             it('should add a reference for the calendar to the parent', () => {
