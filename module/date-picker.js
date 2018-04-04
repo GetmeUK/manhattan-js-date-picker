@@ -384,6 +384,9 @@ export class DatePicker {
         $.dispatch(this.input, 'opened')
     }
 
+    /**
+     * Pick (select) the given date within the date picker and calendar.
+     */
     pick(date) {
         // Select the date in the calendar
         this.calendar.date = date
