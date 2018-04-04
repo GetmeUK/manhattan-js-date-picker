@@ -244,6 +244,9 @@ export class DatePicker {
         $.dispatch(this.input, 'closed')
     }
 
+    /**
+     * Remove the date picker.
+     */
     destroy() {
         // Remove event listeners
         $.ignore(
@@ -283,6 +286,9 @@ export class DatePicker {
         delete this._dom.input._mhDatePicker
     }
 
+    /**
+     * Initialize the date picker.
+     */
     init() {
         // Store a reference to the date picker instance against the input
         this._dom.input._mhDatePicker = this
