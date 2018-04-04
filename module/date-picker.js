@@ -170,7 +170,7 @@ export class DatePicker {
         // Store a reference to the input element
         this._dom.input = input
 
-        // set up event handlers
+        // Set up event handlers
         this._handlers = {
 
             'close': () => {
