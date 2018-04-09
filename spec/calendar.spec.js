@@ -14,7 +14,7 @@ describe('Calendar', () => {
     let pickerElm = null
 
     beforeEach(() => {
-        pickerElm = $.create('picker')
+        pickerElm = $.create('div')
         document.body.appendChild(pickerElm)
     })
 
