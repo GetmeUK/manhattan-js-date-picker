@@ -337,8 +337,7 @@ describe('DatePicker', () => {
             it('should set up event handlers for the date picker', () => {
                 datePicker.init()
 
-                // Resizing the window should no longer trigger the close
-                // event.
+                // Resizing the window should call the close event handler
                 $.dispatch(window, 'fullscreenchange')
                 $.dispatch(window, 'orientationchange')
                 $.dispatch(window, 'resize')
