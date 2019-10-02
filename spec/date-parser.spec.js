@@ -8,6 +8,28 @@ chai.should()
 chai.use(require('sinon-chai'))
 
 
+// Utils
+
+function freezeDate(d) {
+    Date._original = Date
+
+    class FrozenDate extends Date {
+        constructor() {
+            super()
+            return new Date._original(d)
+        }
+    }
+
+    global.Date = FrozenDate
+}
+
+function unfreezeDate() {
+    global.Date = Date._original
+}
+
+
+// Tests
+
 describe('DateParser', () => {
 
     describe('constructor', () => {
@@ -96,6 +118,10 @@ describe('DateParser', () => {
             parser = new DateParser()
         })
 
+        afterEach(() => {
+            parser = new DateParser()
+        })
+
         describe('format', () => {
             it('should format the given date using the named '
                 + 'formatter', () => {
@@ -103,6 +129,43 @@ describe('DateParser', () => {
                 const date = new Date(2018, 2, 19)
                 const s = parser.format('human', date)
                 s.should.equal('19 March 2018')
+            })
+        })
+
+        describe('getFullYear (preferPast: false)', () => {
+
+            beforeEach(() => {
+                freezeDate(new Date(2020, 5, 11))
+            })
+
+            afterEach(() => {
+                unfreezeDate()
+            })
+
+            it('should return a full year for the current century', () => {
+                const y = parser.getFullYear(50)
+                y.should.equal(2050)
+            })
+        })
+
+        describe('getFullYear (preferPast: true)', () => {
+
+            beforeEach(() => {
+                freezeDate(new Date(2020, 5, 11))
+            })
+
+            afterEach(() => {
+                unfreezeDate()
+            })
+
+            it('should return a full year for the previous century', () => {
+                parser.preferPast = true
+
+                let y = parser.getFullYear(50)
+                y.should.equal(1950)
+
+                y = parser.getFullYear(10)
+                y.should.equal(2010)
             })
         })
 

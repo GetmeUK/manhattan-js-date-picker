@@ -72,6 +72,13 @@ export class DatePicker {
                 'parsers': ['human', 'dmy', 'iso'],
 
                 /**
+                 * A flag indicating that when the date parser automatically
+                 * generates a century for a date it should pick a century for
+                 * for past dates over future dates.
+                 */
+                'preferPast': false,
+
+                /**
                  * A list of abbreviated month names used by the date picker.
                  */
                 'shortMonthNames': DEFAULT_SHORT_MONTH_NAMES,
@@ -118,7 +125,8 @@ export class DatePicker {
         // parse options that contain dates).
         this._dateParser = new DateParser(
             this._options.monthNames,
-            this._options.shortMonthNames
+            this._options.shortMonthNames,
+            this._options.preferPast
         )
 
         // Handle date based options

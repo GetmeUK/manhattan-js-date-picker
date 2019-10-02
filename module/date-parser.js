@@ -40,14 +40,20 @@ export class DateParser {
 
     constructor(
         monthNames=DEFAULT_MONTH_NAMES,
-        shortMonthNames=DEFAULT_SHORT_MONTH_NAMES
+        shortMonthNames=DEFAULT_SHORT_MONTH_NAMES,
+        preferPast=false
     ) {
         // Set the month names used when formatting/parsing dates
         this.monthNames = monthNames
         this.shortMonthNames = shortMonthNames
+
+        // If `true` then the parser will prefer past dates when determining
+        // what century to generate (if not given).
+        this.preferPast = preferPast
     }
 
     // -- Getters & Setters ---
+
     get monthNames() {
         return this._monthNames.slice()
     }
@@ -77,6 +83,20 @@ export class DateParser {
      */
     format(formatter, date) {
         return this.constructor.formatters[formatter](this, date)
+    }
+
+    /**
+     * Return a full year (4-digit) from a partial year (2-digit).
+     */
+    getFullYear(year) {
+        let currentYear = (new Date()).getYear()
+        let century = parseInt((new Date()).getFullYear() / 100, 10)
+
+        if (this.preferPast && (year + 100) > currentYear) {
+            century -= 1
+        }
+
+        return year + (century * 100)
     }
 
     /**
@@ -178,7 +198,7 @@ DateParser.parsers = {
         // If the year doesn't contain the century then we add the current
         // century to it.
         if (year < 100) {
-            year += parseInt((new Date()).getFullYear() / 100, 10) * 100
+            year = inst.getFullYear(year)
         }
 
         // Convert the components to a native date
@@ -298,7 +318,7 @@ DateParser.parsers = {
             // If the year doesn't contain the century then we add the current
             // century to it.
             if (year < 100) {
-                year += parseInt((new Date()).getFullYear() / 100, 10) * 100
+                year = inst.getFullYear(year)
             }
         }
 
@@ -379,7 +399,7 @@ DateParser.parsers = {
         // If the year doesn't contain the century then we add the current
         // century to it.
         if (year < 100) {
-            year += parseInt((new Date()).getFullYear() / 100, 10) * 100
+            year = inst.getFullYear(year)
         }
 
         // Convert the components to a native date
