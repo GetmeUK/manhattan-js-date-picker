@@ -156,7 +156,8 @@ export class DatePicker {
             this._behaviours,
             {
                 'dateTest': 'any',
-                'input': 'setValue'
+                'input': 'setValue',
+                'openDate': 'today'
             },
             options,
             input,
@@ -374,7 +375,12 @@ export class DatePicker {
             this._options.parsers,
             this.input.value
         )
-        if (date !== null) {
+        if (date === null) {
+            const openDate = this.constructor
+                    .behaviours
+                    .openDate[this._behaviours.openDate]
+            this.calendar.goto(...openDate(this))
+        } else {
             this.calendar.goto(date.getMonth(), date.getFullYear())
             this.calendar.date = date
         }
@@ -494,6 +500,57 @@ DatePicker.behaviours = {
             if (inst.input.value !== orginalValue) {
                 $.dispatch(inst.input, 'change')
             }
+        }
+
+    },
+
+    /**
+     * The `openDate` behaviour is used to set the date displayed when the
+     * date picker is opened (e.g which month is displayed) and no date has
+     * been set. The behaviours should return a [month, year] to display.
+     */
+    'openDate': {
+
+        /**
+         * Offset by X months from the value of another field or the current
+         * month.
+         */
+        'offset': (inst) => {
+
+            // Get the date value for the linked to field
+            const linkedSelector = inst
+                ._dom
+                .input
+                .getAttribute('data-mh-date-picker--linked-to')
+            const linkedInput = $.one(linkedSelector)
+            let date = linkedInput._mhDatePicker.calendar.date
+
+            // Get the month offset to apply
+            let offset = inst
+                ._dom
+                .input
+                .getAttribute('data-mh-date-picker--open-offset') || 0
+            offset = parseInt(offset, 10)
+
+            // Apply the offset
+            for (let i = 0; i < offset; i += 1) {
+                if (date.getMonth() == 11) {
+                    date = new Date(date.getFullYear() + 1, 0, 1)
+                } else {
+                    date = new Date(date.getFullYear(), date.getMonth() + 1, 1)
+                }
+            }
+
+            return [date.getMonth(), date.getFullYear()]
+        },
+
+        /**
+         * Show the current month.
+         */
+        'today': (inst) => {
+            const date = new Date()
+            date.setHours(0, 0, 0, 0)
+            return [date.getMonth(), date.getFullYear()]
         }
 
     }
