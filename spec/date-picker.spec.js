@@ -14,6 +14,7 @@ chai.use(require('sinon-chai'))
 describe('DatePicker', () => {
 
     let inputElm = null
+    let otherInputElm = null
 
     beforeEach(() => {
         inputElm = $.create(
@@ -24,10 +25,21 @@ describe('DatePicker', () => {
             }
         )
         document.body.appendChild(inputElm)
+
+        otherInputElm = $.create(
+            'input',
+            {
+                'name': 'other_input',
+                'type': 'text',
+                'value': '1st March 2017'
+            }
+        )
+        document.body.appendChild(otherInputElm)
     })
 
     afterEach(() => {
         document.body.removeChild(inputElm)
+        document.body.removeChild(otherInputElm)
     })
 
     describe('constructor', () => {
@@ -56,6 +68,19 @@ describe('DatePicker', () => {
                 dates[1].getTime()
                     .should
                     .equal((new Date(2015, 2, 15)).getTime())
+            })
+        })
+
+        describe('linkedTo', () => {
+            it('should accept a selector string and convert it to an '
+                + 'element', () => {
+
+                const datePicker = new DatePicker(
+                    inputElm,
+                    {'linkedTo': 'input[name="other_input"]'}
+                )
+                const {linkedTo} = datePicker._options
+                linkedTo.should.equal(otherInputElm)
             })
         })
 
@@ -421,17 +446,19 @@ describe('DatePicker', () => {
                 datePicker.calendar.year.should.equal(2017)
             })
 
-            it('should not set the date for the calendar the input\'s '
-                + 'value is not a valid date', () => {
+            it('should set a default open date for the calendar if the '
+                + 'input\'s value is not a valid date', () => {
                 datePicker.calendar.goto(1, 2010)
                 datePicker.calendar.date = new Date(2010, 1, 5)
                 inputElm.value = 'querty'
                 datePicker.open()
 
                 const {date} = datePicker.calendar
-                date.getTime().should.equal((new Date(2010, 1, 5)).getTime())
-                datePicker.calendar.month.should.equal(1)
-                datePicker.calendar.year.should.equal(2010)
+                const today = new Date()
+                today.setHours(0, 0, 0, 0)
+                date.getTime().should.equal(today.getTime())
+                datePicker.calendar.month.should.equal(today.getMonth())
+                datePicker.calendar.year.should.equal(today.getFullYear())
             })
 
             it('should call _track to make sure the picker is inline with '
@@ -662,6 +689,54 @@ describe('DatePicker', () => {
                 onChange.should.not.have.been.called
             })
         })
+    })
+
+    describe('behaviours > openDate', () => {
+        const behaviours = DatePicker.behaviours.openDate
+        let datePicker = null
+        let otherDatePicker = null
+
+        beforeEach(() => {
+            datePicker = new DatePicker(
+                inputElm,
+                {
+                    'linkedTo': 'input[name="other_input"]',
+                    'openOffset': 1
+                }
+            )
+            datePicker.init()
+            otherDatePicker = new DatePicker(otherInputElm)
+            otherDatePicker.init()
+        })
+
+        afterEach(() => {
+            datePicker.destroy()
+            otherDatePicker.destroy()
+        })
+
+        describe('offset', () => {
+
+            it('should return the day after the linked input\'s date', () => {
+                const date = behaviours.offset(datePicker)
+                const tomorrow = new Date()
+                tomorrow.setHours(0, 0, 0, 0)
+                tomorrow.setDate(tomorrow.getDate() + 1)
+                date.getTime().should.equal(tomorrow.getTime())
+            })
+
+        })
+
+        describe('today', () => {
+
+            it('should return todays date', () => {
+                const date = behaviours.today(datePicker)
+                const today = new Date()
+                today.setHours(0, 0, 0, 0)
+                date.getTime().should.equal(today.getTime())
+            })
+
+        })
+
     })
 
     describe('events', () => {

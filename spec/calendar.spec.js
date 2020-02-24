@@ -381,35 +381,19 @@ describe('Calendar', () => {
                     .true
             })
 
-            it('should add blocked class to dates that outside of the current '
-                + 'month', () => {
+            it('should add outside month class to dates that outside of the current '
+                + 'current month', () => {
 
                 for (let dateElm of calendar._dom.dates.childNodes) {
                     if (dateElm._date.getMonth() === 0) {
                         dateElm.classList
-                            .contains(Calendar.css['blocked'])
+                            .contains(Calendar.css['outside-month'])
                             .should
                             .be
                             .false
                     } else {
                         dateElm.classList
-                            .contains(Calendar.css['blocked'])
-                            .should
-                            .be
-                            .true
-                    }
-                }
-
-            })
-
-            it('should add blocked class to dates that don\'t pass the given '
-                + 'testDate function', () => {
-
-                calendar.goto(1, 2010)
-                for (let dateElm of calendar._dom.dates.childNodes) {
-                    if (dateElm._date.getDate() === 5) {
-                        dateElm.classList
-                            .contains(Calendar.css['blocked'])
+                            .contains(Calendar.css['outside-month'])
                             .should
                             .be
                             .true
@@ -485,10 +469,9 @@ describe('Calendar', () => {
             })
 
             it('should do nothing if the date picked is blocked', () => {
-
-                calendar.goto(6, 2010)
                 const {date} = calendar
                 const [dateElm] = calendar._dom.dates.childNodes
+                dateElm.classList.add(Calendar.css['blocked'])
                 $.dispatch(dateElm, 'click')
                 calendar.date.getTime().should.equal(date.getTime())
                 onPicked.should.not.have.been.called

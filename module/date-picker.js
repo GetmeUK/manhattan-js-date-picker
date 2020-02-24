@@ -43,6 +43,12 @@ export class DatePicker {
                 'format': 'human',
 
                 /**
+                 * Another element (input) this date picker is linked to, the
+                 * element must also be a date picker.
+                 */
+                'linkedTo': null,
+
+                /**
                  * The latest date that can be selected.
                  */
                 'maxDate': null,
@@ -63,6 +69,13 @@ export class DatePicker {
                  * displayed).
                  */
                 'noPopup': false,
+
+                /**
+                 * The number of days to offset the open date when opening the
+                 * date picker from a linked date picker (see behaviours >
+                 * openDate > offset.
+                 */
+                'openOffset': 0,
 
                 /**
                  * A list of parsers that will be used to attempt to parse
@@ -107,6 +120,9 @@ export class DatePicker {
             })
         }
 
+        if (typeof this._options.linkedTo === 'string') {
+            this._options.linkedTo = $.one(this._options.linkedTo)
+        }
         if (typeof this._options.monthNames === 'string') {
             this._options.monthNames = _toArray(this._options.monthNames)
         }
@@ -375,11 +391,13 @@ export class DatePicker {
             this._options.parsers,
             this.input.value
         )
+
         if (date === null) {
             const openDate = this.constructor
                     .behaviours
-                    .openDate[this._behaviours.openDate]
-            this.calendar.goto(...openDate(this))
+                    .openDate[this._behaviours.openDate](this)
+            this.calendar.goto(openDate.getMonth(), openDate.getFullYear())
+            this.calendar.date = openDate
         } else {
             this.calendar.goto(date.getMonth(), date.getFullYear())
             this.calendar.date = date
@@ -512,36 +530,19 @@ DatePicker.behaviours = {
     'openDate': {
 
         /**
-         * Offset by X months from the value of another field or the current
+         * Offset by X days from the value of another field or the current
          * month.
          */
         'offset': (inst) => {
 
             // Get the date value for the linked to field
-            const linkedSelector = inst
-                ._dom
-                .input
-                .getAttribute('data-mh-date-picker--linked-to')
-            const linkedInput = $.one(linkedSelector)
-            let date = linkedInput._mhDatePicker.calendar.date
-
-            // Get the month offset to apply
-            let offset = inst
-                ._dom
-                .input
-                .getAttribute('data-mh-date-picker--open-offset') || 0
-            offset = parseInt(offset, 10)
+            let date = inst._options.linkedTo._mhDatePicker.calendar.date
 
             // Apply the offset
-            for (let i = 0; i < offset; i += 1) {
-                if (date.getMonth() == 11) {
-                    date = new Date(date.getFullYear() + 1, 0, 1)
-                } else {
-                    date = new Date(date.getFullYear(), date.getMonth() + 1, 1)
-                }
-            }
+            date.setDate(date.getDate() + inst._options.openOffset)
+            date.setHours(0, 0, 0, 0)
 
-            return [date.getMonth(), date.getFullYear()]
+            return date
         },
 
         /**
@@ -550,7 +551,7 @@ DatePicker.behaviours = {
         'today': (inst) => {
             const date = new Date()
             date.setHours(0, 0, 0, 0)
-            return [date.getMonth(), date.getFullYear()]
+            return date
         }
 
     }

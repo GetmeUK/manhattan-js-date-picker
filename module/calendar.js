@@ -335,7 +335,7 @@ export class Calendar {
 
             // Not in the current month (blocked)
             if (date.getMonth() !== this.month) {
-                classList.add(css['blocked'])
+                classList.add(css['outside-month'])
             }
 
             // Blocked by the dates test (blocked)
@@ -410,6 +410,11 @@ Calendar.css = {
      * Applied to the calendar's 'next month' navigation element.
      */
     'next': 'mh-calendar__next',
+
+    /**
+     * Applied to a date in the calendar which is outside of the current month.
+     */
+    'outside-month': 'mh-calendar__date--outside-month',
 
     /**
      * Applied to the calendar's 'previous month' navigation element.
