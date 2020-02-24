@@ -354,6 +354,15 @@ export class DatePicker {
         )
         this.calendar.init()
 
+        // Attempt to calendar date from initial field value
+        const date = this.dateParser.parse(
+            this._options.parsers,
+            this.input.value
+        )
+        if (date !== null) {
+            this.calendar.date = date
+        }
+
         // Set up event listeners
         $.listen(
             window,

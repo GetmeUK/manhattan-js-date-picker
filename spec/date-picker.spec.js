@@ -43,7 +43,7 @@ describe('DatePicker', () => {
     })
 
     describe('constructor', () => {
-        it('should generate a new `Calendar` instance', () => {
+        it('should generate a new `DatePicker` instance', () => {
             const datePicker = new DatePicker(inputElm)
             datePicker.should.be.an.instanceof(DatePicker)
         })
@@ -354,9 +354,22 @@ describe('DatePicker', () => {
                     .true
             })
 
-            it('should initialize a calendar', () => {
+            it('should initialize a calendar with date set', () => {
                 datePicker.init()
                 datePicker.calendar.should.be.an.instanceof(Calendar)
+
+                const date = new Date(2017, 2, 5)
+                datePicker.calendar.date.getTime().should.equal(date.getTime())
+            })
+
+            it('should initialize a calendar with no date set', () => {
+                inputElm.value = ''
+                datePicker.init()
+                datePicker.calendar.should.be.an.instanceof(Calendar)
+
+                const today = new Date()
+                today.setHours(0, 0, 0, 0)
+                datePicker.calendar.date.getTime().should.equal(today.getTime())
             })
 
             it('should set up event handlers for the date picker', () => {
@@ -718,8 +731,7 @@ describe('DatePicker', () => {
 
             it('should return the day after the linked input\'s date', () => {
                 const date = behaviours.offset(datePicker)
-                const tomorrow = new Date()
-                tomorrow.setHours(0, 0, 0, 0)
+                const tomorrow = new Date(2017, 2, 1)
                 tomorrow.setDate(tomorrow.getDate() + 1)
                 date.getTime().should.equal(tomorrow.getTime())
             })
@@ -730,6 +742,7 @@ describe('DatePicker', () => {
 
             it('should return todays date', () => {
                 const date = behaviours.today(datePicker)
+                console.log(datePicker.calendar.date)
                 const today = new Date()
                 today.setHours(0, 0, 0, 0)
                 date.getTime().should.equal(today.getTime())
