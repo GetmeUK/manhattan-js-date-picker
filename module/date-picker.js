@@ -295,7 +295,7 @@ export class DatePicker {
 
         // Destroy the calendar
         if (this.calendar !== null) {
-            $.ignore(this.calendar.calendar, {'picked': this._handlers.pick})
+            $.ignore(this.calendar.calendar, {'picked': this._handlers.picked})
 
             this.calendar.destroy()
             this._calendar = null
@@ -354,7 +354,7 @@ export class DatePicker {
         )
         this.calendar.init()
 
-        // Attempt to calendar date from initial field value
+        // Attempt to get the the date from initial field value
         const date = this.dateParser.parse(
             this._options.parsers,
             this.input.value
@@ -403,8 +403,8 @@ export class DatePicker {
 
         if (date === null) {
             const openDate = this.constructor
-                    .behaviours
-                    .openDate[this._behaviours.openDate](this)
+                .behaviours
+                .openDate[this._behaviours.openDate](this)
             this.calendar.goto(openDate.getMonth(), openDate.getFullYear())
             this.calendar.date = openDate
         } else {
@@ -521,10 +521,9 @@ DatePicker.behaviours = {
                 date
             )
 
-            // Dispatch a change event against the input, but flag that the
-            // event was triggered by the date picker so we don't trigger an
-            // infinite cycle.
             if (inst.input.value !== orginalValue) {
+
+                // Dispatch a change event against the input
                 $.dispatch(inst.input, 'change')
             }
         }
@@ -534,7 +533,7 @@ DatePicker.behaviours = {
     /**
      * The `openDate` behaviour is used to set the date displayed when the
      * date picker is opened (e.g which month is displayed) and no date has
-     * been set. The behaviours should return a [month, year] to display.
+     * been set. The behaviours should return a date to display.
      */
     'openDate': {
 
