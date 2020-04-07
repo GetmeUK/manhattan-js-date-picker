@@ -742,7 +742,6 @@ describe('DatePicker', () => {
 
             it('should return todays date', () => {
                 const date = behaviours.today(datePicker)
-                console.log(datePicker.calendar.date)
                 const today = new Date()
                 today.setHours(0, 0, 0, 0)
                 date.getTime().should.equal(today.getTime())
@@ -817,7 +816,7 @@ describe('DatePicker', () => {
 
         describe('pick', () => {
 
-            it('should call pick against the date picker', () => {
+            it('should trigger picked event against the input', () => {
                 const onPicked = sinon.spy()
                 $.listen(inputElm, {'picked': onPicked})
                 $.dispatch(
@@ -827,8 +826,6 @@ describe('DatePicker', () => {
                 )
                 onPicked.should.have.been.called
             })
-
         })
     })
-
 })

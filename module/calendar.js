@@ -361,11 +361,7 @@ export class Calendar {
         $.dispatch(
             this.calendar,
             'updated',
-            {
-                'date': this.date,
-                'month': this.month,
-                'year': this.year
-            }
+            {'date': this.date}
         )
     }
 }

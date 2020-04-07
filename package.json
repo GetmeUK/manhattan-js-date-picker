@@ -1,6 +1,6 @@
 {
   "name": "manhattan-date-picker",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Date parsing and picking for form fields.",
   "engines": {
     "node": ">=8.9.4"
@@ -41,8 +41,10 @@
   },
   "keywords": [
     "manhattan",
-    "date parser",
-    "date picker"
+    "time field",
+    "time parser",
+    "time picker",
+    "time parser"
   ],
   "author": "Anthony Blackshaw",
   "license": "MIT",
