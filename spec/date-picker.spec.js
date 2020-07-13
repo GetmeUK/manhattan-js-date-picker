@@ -568,7 +568,18 @@ describe('DatePicker', () => {
                     'height': 20,
                     'left': 30,
                     'right': 130,
-                    'top': 20,
+                    'top': 100,
+                    'width': 100
+                }
+            }
+
+            datePicker.picker.getBoundingClientRect = () => {
+                return {
+                    'bottom': 50,
+                    'height': 50,
+                    'left': 0,
+                    'right': 100,
+                    'top': 0,
                     'width': 100
                 }
             }
@@ -579,11 +590,43 @@ describe('DatePicker', () => {
 
         afterEach(() => {
             datePicker.destroy()
+
+            Object.defineProperty(
+                document.body,
+                'scrollHeight',
+                {
+                    'configurable': true,
+                    'value': 0
+                }
+            )
         })
 
         describe('track', () => {
 
             it('should position the picker inline with the input', () => {
+
+                Object.defineProperty(
+                    document.body,
+                    'scrollHeight',
+                    {
+                        'configurable': true,
+                        'value': 1000
+                    }
+                )
+
+                datePicker._track()
+                datePicker.picker.style.top.should.equal('140px')
+                datePicker.picker.style.left.should.equal('40px')
+
+                Object.defineProperty(
+                    document.body,
+                    'scrollHeight',
+                    {
+                        'configurable': true,
+                        'value': 120
+                    }
+                )
+
                 datePicker._track()
                 datePicker.picker.style.top.should.equal('50px')
                 datePicker.picker.style.left.should.equal('40px')

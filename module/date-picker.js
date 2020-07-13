@@ -103,6 +103,12 @@ export class DatePicker {
                 'stayOpenOnPick': false,
 
                 /**
+                 * The vertical offset applied when tracking the date picker
+                 * to a field.
+                 */
+                'trackOffset': 10,
+
+                /**
                  * A list of weekday names used by the date picker.
                  */
                 'weekdayNames': DEFAULT_WEEKDAY_NAMES
@@ -412,11 +418,11 @@ export class DatePicker {
             this.calendar.date = date
         }
 
-        // Update the position of the picker inline with the associated input
-        this._track()
-
         // Show the date picker
         this.picker.classList.add(this.constructor.css['open'])
+
+        // Update the position of the picker inline with the associated input
+        this._track()
 
         // Flag the date picker as open
         this._open = true
@@ -450,10 +456,21 @@ export class DatePicker {
      * Position the date picker inline with the associated input element.
      */
     _track() {
+        const offset = this._options.trackOffset
+
         const rect = this.input.getBoundingClientRect()
         const top = rect.top + window.pageYOffset
         const left = rect.left + window.pageXOffset
-        this.picker.style.top = `${top + rect.height}px`
+
+        const pickerRect = this.picker.getBoundingClientRect()
+        const pickerBottom = top + pickerRect.height
+
+        if (pickerBottom > document.body.scrollHeight) {
+            console.log(top, pickerRect.height, offset)
+            this.picker.style.top = `${top - pickerRect.height - offset}px`
+        } else {
+            this.picker.style.top = `${top + rect.height + offset}px`
+        }
         this.picker.style.left = `${left}px`
     }
 }
