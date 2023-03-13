@@ -463,15 +463,21 @@ export class DatePicker {
         const left = rect.left + window.pageXOffset
 
         const pickerRect = this.picker.getBoundingClientRect()
+        const pickerRight = left + pickerRect.width
         const pickerBottom = top + pickerRect.height
 
+        if (pickerRight > document.body.scrollWidth) {
+            this.picker.style
+                .left = `${document.body.scrollWidth - pickerRect.width}px`
+        } else {
+            this.picker.style.left = `${left}px`
+        }
+
         if (pickerBottom > document.body.scrollHeight) {
-            console.log(top, pickerRect.height, offset)
             this.picker.style.top = `${top - pickerRect.height - offset}px`
         } else {
             this.picker.style.top = `${top + rect.height + offset}px`
         }
-        this.picker.style.left = `${left}px`
     }
 }
 
