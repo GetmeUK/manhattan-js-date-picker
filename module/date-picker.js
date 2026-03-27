@@ -78,6 +78,11 @@ export class DatePicker {
                 'openOffset': 0,
 
                 /**
+                 * The parent element (or a selector) to add the date picker to.
+                 */
+                'parent': null,
+
+                /**
                  * A list of parsers that will be used to attempt to parse
                  * an input string as a date (strings are parsed using each
                  * parser in turn and in the order given).
@@ -198,6 +203,15 @@ export class DatePicker {
             'picker': null
         }
 
+        // Store the parent element
+        if (this._options.parent === null) {
+            this._dom.parent = document.body
+        } else if (typeof this._options.parent === 'string') {
+            this._dom.parent = $.one(this._options.parent)
+        } else if (this._options.parent instanceof Element) {
+            this._dom.parent.parent = this._options.parent
+        }
+
         // Store a reference to the input element
         this._dom.input = input
 
@@ -309,7 +323,7 @@ export class DatePicker {
 
         // Remove the date picker element
         if (this._dom.picker !== null) {
-            document.body.removeChild(this._dom.picker)
+            this._dom.parent.removeChild(this._dom.picker)
             this._dom.picker = null
         }
 
@@ -329,7 +343,7 @@ export class DatePicker {
             'div',
             {'class': this.constructor.css['picker']}
         )
-        document.body.appendChild(this._dom.picker)
+        this._dom.parent.appendChild(this._dom.picker)
 
         // Set up calendar
         this._calendar = new Calendar(
@@ -459,21 +473,27 @@ export class DatePicker {
         const offset = this._options.trackOffset
 
         const rect = this.input.getBoundingClientRect()
-        const top = rect.top + window.pageYOffset
-        const left = rect.left + window.pageXOffset
+        let top = rect.top + window.pageYOffset
+        let left = rect.left + window.pageXOffset
+
+        if (this.parent !== document.body) {
+            const parentRect = this._dom.parent.getBoundingClientRect()
+            top = rect.top - parentRect.top + this._dom.parent.scrollTop
+            left = rect.left - parentRect.left + this._dom.parent.scrollLeft
+        }
 
         const pickerRect = this.picker.getBoundingClientRect()
         const pickerRight = left + pickerRect.width
         const pickerBottom = top + pickerRect.height
 
-        if (pickerRight > document.body.scrollWidth) {
+        if (pickerRight > this._dom.parent.scrollWidth) {
             this.picker.style
-                .left = `${document.body.scrollWidth - pickerRect.width}px`
+                .left = `${this._dom.parent.scrollWidth - pickerRect.width}px`
         } else {
             this.picker.style.left = `${left}px`
         }
 
-        if (pickerBottom > document.body.scrollHeight) {
+        if (pickerBottom > this._dom.parent.scrollHeight) {
             this.picker.style.top = `${top - pickerRect.height - offset}px`
         } else {
             this.picker.style.top = `${top + rect.height + offset}px`
